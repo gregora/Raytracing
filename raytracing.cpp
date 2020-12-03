@@ -75,18 +75,13 @@ bool Triangle::RayHitsTriangle(Vector ray, Vector ray_position){
 
   if(k > 1 || k < 0) return false;
 
-  //////DOES NOT WORK
-
   Vector point_of_intersection;
   point_of_intersection = ray_position + ray*k - position;
 
   float m = (point_of_intersection.y*a.x - point_of_intersection.x*a.y) / (b.y*a.x - b.x*a.y);
-  float n = (point_of_intersection.x - m*b.x)/ a.x;
-
-  //point_of_intersection.Output();
-  //(a*n + b*m).Output();
-
   if(m < 0 || m > 1) return false;
+
+  float n = (point_of_intersection.x - m*b.x)/ a.x;
   if(n < 0 || n > 1) return false;
 
   if(n + m > 1) return false;
