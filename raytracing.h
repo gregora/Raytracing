@@ -1,10 +1,11 @@
+#include <vector>
 
 class Vector {
 
   public:
-    float x = 0;
-    float y = 0;
-    float z = 0;
+    float x = 0.01f;
+    float y = 0.01f;
+    float z = 0.01f;
 
     Vector(float setx = 0, float sety = 0, float setz = 0);
 
@@ -32,6 +33,10 @@ class Triangle {
     Vector a;
     Vector b;
 
+    float red;
+    float green;
+    float blue;
+
     Triangle(float* points);
 
     Vector Normal();
@@ -44,3 +49,37 @@ class Triangle {
 
 
 float DotProduct(Vector v1, Vector v2);
+
+
+class Frame {
+
+  public:
+    float yaw = 20;
+    float pitch = 30;
+    float roll = 0;
+
+    float fov = 180;
+
+    float *** frame = nullptr;
+
+    Vector camera_position;
+    float ray_length = 1000;
+
+    int width;
+    int height;
+    std::vector<Triangle *> triangles;
+
+    Frame(const int setwidth, const int setheight);
+
+    void Render();
+
+    void Debug();
+
+    Vector GetCameraDirection();
+
+
+  private:
+    Vector camera_direction;
+
+
+};

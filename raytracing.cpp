@@ -1,6 +1,7 @@
 #include "raytracing.h"
 #include <iostream>
 #include "math.h"
+#include <vector>
 
 Vector::Vector(float setx, float sety, float setz){
 
@@ -10,8 +11,8 @@ Vector::Vector(float setx, float sety, float setz){
 
   if(x == 0) x = 0.01f;
   if(y == 0) y = 0.01f;
-  if(x == 0) x = 0.01f;
-  if(y == 0) y = 0.01f;
+  if(z == 0) z = 0.01f;
+
 }
 
 Vector Vector::operator* (float n){
@@ -90,8 +91,85 @@ bool Triangle::RayHitsTriangle(Vector ray, Vector ray_position){
 }
 
 
+
 float DotProduct(Vector v1, Vector v2){
 
   return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
+
+}
+
+
+Frame::Frame(const int setwidth, const int setheight){
+
+  width = setwidth;
+  height = setheight;
+
+  //create 3D array
+  frame = new float** [3];
+  for(int i = 0; i < 3; i++){
+    frame[i] = new float* [width];
+    for(int j = 0; j < width; j++){
+      frame[i][j] = new float[height];
+    }
+  }
+
+}
+
+
+void Frame::Render(){
+
+  GetCameraDirection();
+
+  for(int i = 0; i < width; i++){
+    for(int j = 0; j < height; j++){
+      bool hits = false;
+
+      Vector current_ray = camera_direction;
+
+      for(int m = 0; m < triangles.size(); m++){
+        if(triangles[m] -> RayHitsTriangle(current_ray, camera_position)){
+          hits = true;
+        }
+      }
+
+      if(hits){
+        frame[0][i][j] = 1;
+        frame[1][i][j] = 1;
+        frame[2][i][j] = 1;
+      }else{
+        frame[0][i][j] = 0;
+        frame[1][i][j] = 0;
+        frame[2][i][j] = 0;
+      }
+
+    }
+  }
+
+}
+
+void Frame::Debug(){
+
+  for(int j = 0; j < height; j++){
+    for(int i = 0; i < width; i++){
+
+      if(frame[0][i][j] == 1){
+        std::cout << "0";
+      }else{
+        std::cout << " ";
+      }
+
+    }
+
+    std::cout << "\n";
+  }
+
+
+}
+
+
+Vector Frame::GetCameraDirection(){
+
+  camera_direction = Vector(ray_length*cos(yaw*0.017452778)*cos(pitch*0.017452778), ray_length*sin(yaw*0.017452778)*cos(pitch*0.017452778), ray_length*sin(pitch*0.017452778));
+  return camera_direction;
 
 }
