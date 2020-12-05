@@ -2,8 +2,7 @@
 #include <iostream>
 #include "math.h"
 #include <vector>
-#include "GL/freeglut.h"
-#include "GL/gl.h"
+#include <limits>
 
 Vector::Vector(float setx, float sety, float setz){
 
@@ -79,24 +78,32 @@ float Triangle::GetRayPlaneIntersection(Vector ray, Vector ray_position){
 }
 
 
-bool Triangle::RayHitsTriangle(Vector ray, Vector ray_position){
+void Triangle::SetColor(float r, float g, float b){
+
+  red = r;
+  green = g;
+  blue = b;
+
+}
+
+float Triangle::RayHitsTriangle(Vector ray, Vector ray_position){
 
   float k = GetRayPlaneIntersection(ray, ray_position);
 
-  if(k > 1 || k < 0) return false;
+  if(k > 1 || k < 0) return -1;
 
   Vector point_of_intersection;
   point_of_intersection = ray_position + ray*k - position;
 
   float m = (point_of_intersection.y*a.x - point_of_intersection.x*a.y) / (b.y*a.x - b.x*a.y);
-  if(m < 0 || m > 1) return false;
+  if(m < 0 || m > 1) return -1;
 
   float n = (point_of_intersection.x - m*b.x)/ a.x;
-  if(n < 0 || n > 1) return false;
+  if(n < 0 || n > 1) return -1;
 
-  if(n + m > 1) return false;
+  if(n + m > 1) return -1;
 
-  return true;
+  return k;
 }
 
 
@@ -122,10 +129,17 @@ Frame::Frame(const int setwidth, const int setheight){
     }
   }
 
+
+  //create 2D array
+  depth_buffer = new float* [width];
+  for(int i = 0; i < width; i++){
+    depth_buffer[i] = new float[height];
+  }
+
 }
 
 
-void Frame::Render(){
+void Frame::Render(float * (*function)(Frame *, int x, int y)){
 
   if(yaw > 360) yaw = (int)yaw % 360;
   if(yaw < 0) yaw = 360 - (-(int)yaw % 360);
@@ -138,6 +152,9 @@ void Frame::Render(){
 
 
   GetCameraDirection();
+
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+  SDL_RenderClear(renderer);
 
   Vector cam = camera_direction;
 
@@ -156,58 +173,92 @@ void Frame::Render(){
   float move_coeficient1 = 2 * tan(0.5*fov/180*3.14) * ray_length / width;
   float move_coeficient2 = 2 * tan(0.5*fov*height/width/180*3.14) * ray_length / height;
 
+  sphere_tangent1 = sphere_tangent1 * move_coeficient1;
+  sphere_tangent2 = sphere_tangent2 * move_coeficient2;
+
   for(int i = 0; i < width; i++){
     for(int j = 0; j < height; j++){
       bool hits = false;
-      Vector current_ray = camera_direction + sphere_tangent1*(i - width/2)* move_coeficient1 + sphere_tangent2*(j - height/2)*move_coeficient2;
-      //current_ray.Output();
+      Vector current_ray = camera_direction + sphere_tangent1*(i - width/2) + sphere_tangent2*(j - height/2);
+
+      int triangle_num = -1;
+      float min_triangle_distance = std::numeric_limits<float>::max();
 
       for(int m = 0; m < triangles.size(); m++){
-        if(triangles[m] -> RayHitsTriangle(current_ray, camera_position)){
-          hits = true;
+
+        float triangle_distance = triangles[m] -> RayHitsTriangle(current_ray, camera_position);
+
+        if(triangle_distance != -1){
+          if(triangle_distance < min_triangle_distance){
+            triangle_num = m;
+            min_triangle_distance = triangle_distance;
+          }
         }
       }
 
-      if(hits){
-        frame[0][i][j] = 1;
-        frame[1][i][j] = 1;
-        frame[2][i][j] = 1;
+      if(triangle_num != -1){
+        frame[0][i][j] = triangles[triangle_num] -> red;
+        frame[1][i][j] = triangles[triangle_num] -> green;
+        frame[2][i][j] = triangles[triangle_num] -> blue;
+
+        depth_buffer[i][j] = min_triangle_distance;
+
       }else{
         frame[0][i][j] = 0;
         frame[1][i][j] = 0;
         frame[2][i][j] = 0;
+
+        depth_buffer[i][j] = std::numeric_limits<float>::max();
       }
+
+
+
+      if(function != nullptr){
+        float * a = function(this, i, j);
+
+        frame[0][i][j] = a[0];
+        frame[1][i][j] = a[1];
+        frame[2][i][j] = a[2];
+
+        delete[] a;
+
+      }
+
+
+      SDL_SetRenderDrawColor(renderer, frame[0][i][j]*255, frame[1][i][j]*255, frame[2][i][j]*255, 255);
+
+      SDL_RenderDrawPoint(renderer, i, j);
+
 
     }
   }
 
-}
+  SDL_RenderPresent(renderer);
 
-void Frame::Debug(bool show_middle){
 
-  for(int j = 0; j < height; j++){
-    for(int i = 0; i < width; i++){
-
-      if(i == (int)(width/2) && j == (int)(height/2)){
-        std::cout << "\033[1;31m*\033[0m";
-      }else if(frame[0][i][j] == 1){
-        std::cout << "0";
-      }else{
-        std::cout << " ";
-      }
-
-    }
-
-    std::cout << "\n";
+  //close on x
+  SDL_Event e;
+  while (SDL_PollEvent(&e)) {
+      if (e.type == SDL_QUIT){
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        exit(EXIT_SUCCESS);
+      };
   }
 
 
 }
-
 
 Vector Frame::GetCameraDirection(){
 
   camera_direction = Vector(ray_length*cos(yaw*0.017452778)*cos(pitch*0.017452778), ray_length*sin(yaw*0.017452778)*cos(pitch*0.017452778), ray_length*sin(pitch*0.017452778));
   return camera_direction;
+
+}
+
+void Frame::CreateWindow(char * title){
+
+  SDL_CreateWindowAndRenderer(width, height, 0, &window, &renderer);
+  SDL_SetWindowTitle(window, title);
 
 }

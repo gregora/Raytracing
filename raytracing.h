@@ -1,4 +1,5 @@
 #include <vector>
+#include <SDL2/SDL.h>
 
 class Vector {
 
@@ -45,8 +46,9 @@ class Triangle {
 
     float GetRayPlaneIntersection(Vector ray, Vector ray_position);
 
-    bool RayHitsTriangle(Vector ray, Vector ray_position);
+    float RayHitsTriangle(Vector ray, Vector ray_position);
 
+    void SetColor(float r, float g, float b);
 
 };
 
@@ -64,6 +66,7 @@ class Frame {
     float fov = 90;
 
     float *** frame = nullptr;
+    float ** depth_buffer = nullptr;
 
     Vector camera_position;
     float ray_length = 1000;
@@ -72,14 +75,17 @@ class Frame {
     int height;
     std::vector<Triangle *> triangles;
 
+
+    SDL_Window *window;
+    SDL_Renderer *renderer;
+
     Frame(const int setwidth, const int setheight);
 
-    void Render();
-
-    void Debug(bool show_middle = true);
+    void Render(float * (*function)(Frame *, int x, int y) = nullptr);
 
     Vector GetCameraDirection();
 
+    void CreateWindow(char * title);
 
   private:
     Vector camera_direction;
