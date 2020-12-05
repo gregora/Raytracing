@@ -1,1 +1,1 @@
-g++ main.cpp raytracing.cpp -o main.out -w
+g++ main.cpp raytracing.cpp -o main.out -lGL -lGLU -lglut

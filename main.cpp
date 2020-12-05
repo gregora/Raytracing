@@ -27,8 +27,6 @@ int main(){
     frame.Render();
     frame.Debug();
 
-    cout << i << endl;
-
     unsigned int microsecond = 1000000;
     usleep(0.01 * microsecond);
   }

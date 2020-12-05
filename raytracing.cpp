@@ -2,6 +2,8 @@
 #include <iostream>
 #include "math.h"
 #include <vector>
+#include "GL/freeglut.h"
+#include "GL/gl.h"
 
 Vector::Vector(float setx, float sety, float setz){
 
@@ -126,11 +128,11 @@ Frame::Frame(const int setwidth, const int setheight){
 void Frame::Render(){
 
   if(yaw > 360) yaw = (int)yaw % 360;
-  if(yaw < 0) yaw = yaw + 360;
+  if(yaw < 0) yaw = 360 - (-(int)yaw % 360);
   if(pitch > 360) pitch = (int)pitch % 360;
-  if(pitch < 0) pitch = pitch + 360;
+  if(pitch < 0) pitch = 360 - (-(int)pitch % 360);
   if(roll > 360) roll = (int)roll % 360;
-  if(roll < 0) roll = roll + 360;
+  if(roll < 0) roll = 360 - (-(int)roll % 360);
 
 
 
