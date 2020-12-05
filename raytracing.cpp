@@ -45,6 +45,13 @@ float Vector::ScalarProjectionOf(Vector v){
     return DotProduct(Vector(x, y, z), v) / (Length() * Length());
 }
 
+void Vector::Normalize(){
+    float length = Length();
+    x = x / length;
+    y = y / length;
+    z = z / length;
+}
+
 Triangle::Triangle(float* points){
 
   position.x = points[0];
@@ -118,13 +125,40 @@ Frame::Frame(const int setwidth, const int setheight){
 
 void Frame::Render(){
 
+  if(yaw > 360) yaw = (int)yaw % 360;
+  if(yaw < 0) yaw = yaw + 360;
+  if(pitch > 360) pitch = (int)pitch % 360;
+  if(pitch < 0) pitch = pitch + 360;
+  if(roll > 360) roll = (int)roll % 360;
+  if(roll < 0) roll = roll + 360;
+
+
+
+
   GetCameraDirection();
+
+  Vector cam = camera_direction;
+
+  //tangents are calculated, so that we know in what directions to shoot the rays
+  float t1 = - sqrt(1 / (1 + camera_direction.x*camera_direction.x / (camera_direction.y * camera_direction.y)));
+  if(yaw > 180) t1 = -t1;
+  float t2 = - t1 * camera_direction.x / camera_direction.y;
+
+  Vector sphere_tangent1 = Vector(t1, t2, 0);
+  Vector sphere_tangent2 = sphere_tangent1 * camera_direction;
+
+  sphere_tangent1.Normalize();
+  sphere_tangent2.Normalize();
+
+  //calculate how far a ray should move considering fov
+  float move_coeficient1 = 2 * tan(0.5*fov/180*3.14) * ray_length / width;
+  float move_coeficient2 = 2 * tan(0.5*fov*height/width/180*3.14) * ray_length / height;
 
   for(int i = 0; i < width; i++){
     for(int j = 0; j < height; j++){
       bool hits = false;
-
-      Vector current_ray = camera_direction;
+      Vector current_ray = camera_direction + sphere_tangent1*(i - width/2)* move_coeficient1 + sphere_tangent2*(j - height/2)*move_coeficient2;
+      //current_ray.Output();
 
       for(int m = 0; m < triangles.size(); m++){
         if(triangles[m] -> RayHitsTriangle(current_ray, camera_position)){
@@ -147,12 +181,14 @@ void Frame::Render(){
 
 }
 
-void Frame::Debug(){
+void Frame::Debug(bool show_middle){
 
   for(int j = 0; j < height; j++){
     for(int i = 0; i < width; i++){
 
-      if(frame[0][i][j] == 1){
+      if(i == (int)(width/2) && j == (int)(height/2)){
+        std::cout << "\033[1;31m*\033[0m";
+      }else if(frame[0][i][j] == 1){
         std::cout << "0";
       }else{
         std::cout << " ";

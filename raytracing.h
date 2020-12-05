@@ -23,6 +23,8 @@ class Vector {
 
     float ScalarProjectionOf(Vector v);
 
+    void Normalize();
+
 };
 
 class Triangle {
@@ -45,6 +47,7 @@ class Triangle {
 
     bool RayHitsTriangle(Vector ray, Vector ray_position);
 
+
 };
 
 
@@ -54,11 +57,11 @@ float DotProduct(Vector v1, Vector v2);
 class Frame {
 
   public:
-    float yaw = 20;
-    float pitch = 30;
+    float yaw = 0;
+    float pitch = 0;
     float roll = 0;
 
-    float fov = 180;
+    float fov = 90;
 
     float *** frame = nullptr;
 
@@ -73,7 +76,7 @@ class Frame {
 
     void Render();
 
-    void Debug();
+    void Debug(bool show_middle = true);
 
     Vector GetCameraDirection();
 
