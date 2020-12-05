@@ -162,9 +162,15 @@ void Frame::Render(float * (*function)(Frame *, int x, int y)){
   float t1 = - sqrt(1 / (1 + camera_direction.x*camera_direction.x / (camera_direction.y * camera_direction.y)));
   if(yaw > 180) t1 = -t1;
   float t2 = - t1 * camera_direction.x / camera_direction.y;
+  float t3  = tan(roll/180*3.14) * sqrt(t1*t1 + t2*t2);
 
-  Vector sphere_tangent1 = Vector(t1, t2, 0);
+  Vector sphere_tangent1 = Vector(t1, t2, t3);
   Vector sphere_tangent2 = sphere_tangent1 * camera_direction;
+
+  if(roll > 90 && roll <= 270){
+    sphere_tangent1 = sphere_tangent1 * (-1);
+    sphere_tangent2 = sphere_tangent2 * (-1);
+  }
 
   sphere_tangent1.Normalize();
   sphere_tangent2.Normalize();
@@ -260,5 +266,9 @@ void Frame::CreateWindow(char * title){
 
   SDL_CreateWindowAndRenderer(width, height, 0, &window, &renderer);
   SDL_SetWindowTitle(window, title);
+
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+  SDL_RenderClear(renderer);
+  SDL_RenderPresent(renderer);
 
 }

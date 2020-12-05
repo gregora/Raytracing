@@ -51,7 +51,7 @@ int main(){
   t.SetColor(1, 1, 1);
 
 
-  float triangle_points3[9] = {100, 20, 0, 100, -20, 0, 100, 0, 50};
+  float triangle_points3[9] = {100, 20, 0, 100, -20, 0, 100, 20, 50};
   Triangle t3(triangle_points3);
   t3.SetColor(0, 1, 1);
 
@@ -66,14 +66,19 @@ int main(){
   frame.camera_position.z = 25;
   frame.pitch = 0;
   frame.yaw = 0;
+  frame.roll = 0;
 
 
   frame.CreateWindow("Raytracing");
 
+  //while(true){
+    frame.Render(Function);
+  //}
+
   for(int i = 0; i > -1; i++){
 
-    frame.yaw = i;
-
+    frame.roll = i;
+    std::cout << i % 360 << endl;
     frame.Render(Function);
 
   }
