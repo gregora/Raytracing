@@ -1,5 +1,6 @@
 #include <vector>
 #include <SDL2/SDL.h>
+#include <string>
 
 class Vector {
 
@@ -86,6 +87,8 @@ class Frame {
     Vector GetCameraDirection();
 
     void CreateWindow(char * title);
+
+    void Load(std::string file);
 
   private:
     Vector camera_direction;

@@ -3,6 +3,9 @@
 #include "math.h"
 #include <vector>
 #include <limits>
+#include <fstream>
+#include <string>
+#include <algorithm>
 
 Vector::Vector(float setx, float sety, float setz){
 
@@ -270,5 +273,59 @@ void Frame::CreateWindow(char * title){
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
   SDL_RenderClear(renderer);
   SDL_RenderPresent(renderer);
+
+}
+
+
+void Frame::Load(std::string file){
+
+  int lines = 0;
+  std::string line;
+  std::ifstream myfile(file);
+
+
+  if (myfile.is_open()){
+    while (std::getline (myfile, line)){
+      lines++;//count the number of lines
+    }
+  }else{
+    std::cout << "Unable to open file";
+  }
+
+  std::ifstream myfile2(file);
+
+  int i = 0;
+  while (std::getline (myfile2, line)){
+    float triangle[9];
+
+    float red, green, blue;
+
+    for(int j = 0; j < 12; j++){
+      int previous_space = 0;
+      int spacepos = line.find(" ");
+
+      float coord = std::stof(line.substr(previous_space, spacepos));
+
+      if(j < 9){
+        triangle[j] = coord;
+      }else if(j == 9){
+        red = coord;
+      }else if(j == 10){
+        green = coord;
+      }else if(j = 11){
+        blue = coord;
+      }
+
+      previous_space = spacepos;
+
+      line = line.substr(previous_space + 1, line.size());
+    }
+
+    Triangle* t = new Triangle(triangle);
+    t -> SetColor(red, green, blue);
+    triangles.push_back(t);
+
+    i++;
+  }
 
 }
