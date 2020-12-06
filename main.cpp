@@ -40,7 +40,7 @@ float * Function(Frame * fr, int x, int y){
 
 int main(){
 
-  bool debug  = false;
+  bool debug  = true;
 
   int width, height;
   string file;

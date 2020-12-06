@@ -13,16 +13,14 @@ Vector::Vector(float setx, float sety, float setz){
   y = sety;
   z = setz;
 
-  if(x == 0) x = 0.01f;
-  if(y == 0) y = 0.01f;
-  if(z == 0) z = 0.01f;
+  if(x == 0) x = 0.01;
+  if(y == 0) y = 0.01;
+  if(z == 0) z = 0.01;
 
 }
 
 Vector Vector::operator* (float n){
-
   return Vector(n*x, n*y, n*z);
-
 }
 
 Vector Vector::operator*(Vector v){
@@ -97,6 +95,10 @@ float Triangle::RayHitsTriangle(Vector ray, Vector ray_position){
 
   Vector point_of_intersection;
   point_of_intersection = ray_position + ray*k - position;
+
+  if((b.y*a.x - b.x*a.y) == 0){
+    b.y += 0.01;
+  }
 
   float m = (point_of_intersection.y*a.x - point_of_intersection.x*a.y) / (b.y*a.x - b.x*a.y);
   if(m < 0 || m > 1) return -1;
