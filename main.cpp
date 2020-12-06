@@ -40,34 +40,33 @@ float * Function(Frame * fr, int x, int y){
 
 int main(){
 
-  Frame frame(200, 200);
+  bool debug  = false;
+
+  int width, height;
+  string file;
+
+  if(!debug){
+
+    cout << "Width: ";
+    cin >> width;
+    cout << "Height: ";
+    cin >> height;
 
 
-  /*float ground_points[9] = {-50000, -50000, 0, 50000, -50000, 0, 0, 50000, 0};
-  Triangle ground(ground_points);
-  ground.SetColor(0, 1, 0);
+    cout << "Scene: ";
+    cin >> file;
 
-  float triangle_points[9] = {150, 80, 0, 150, -80, 0, 150, 0, 50};
-  Triangle t(triangle_points);
-  t.SetColor(1, 1, 1);
+  }else{
+    file = "scenes/scene1.sc";
+    width = 200;
+    height = 200;
+  }
 
-
-  float triangle_points3[9] = {100, 20, 0, 100, -20, 0, 100, 20, 50};
-  Triangle t3(triangle_points3);
-  t3.SetColor(0, 1, 1);
-
-  float triangle_points2[9] = {-150, 80, 0, -150, -80, 0, -150, 0, 50};
-  Triangle t2(triangle_points2);
-  t2.SetColor(1, 0, 1);
+  Frame frame(width, height);
 
 
-  frame.triangles.push_back(&t);
-  frame.triangles.push_back(&t2);
-  frame.triangles.push_back(&t3);
-  frame.triangles.push_back(&ground);
-  */
 
-  frame.Load("scenes/scene1.sc");
+  frame.Load(file);
 
   frame.camera_position.z = 25;
   frame.pitch = 0;
