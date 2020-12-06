@@ -2,6 +2,8 @@
 #include <SDL2/SDL.h>
 #include <string>
 
+const float deg2rad = 0.017452778;
+
 class Vector {
 
   public:

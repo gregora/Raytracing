@@ -44,14 +44,14 @@ float Vector::Length(){
 }
 
 float Vector::ScalarProjectionOf(Vector v){
-    return DotProduct(Vector(x, y, z), v) / (Length() * Length());
+  return DotProduct(Vector(x, y, z), v) / (Length() * Length());
 }
 
 void Vector::Normalize(){
-    float length = Length();
-    x = x / length;
-    y = y / length;
-    z = z / length;
+  float length = Length();
+  x = x / length;
+  y = y / length;
+  z = z / length;
 }
 
 Triangle::Triangle(float* points){
@@ -262,7 +262,7 @@ void Frame::Render(float * (*function)(Frame *, int x, int y)){
 
 Vector Frame::GetCameraDirection(){
 
-  camera_direction = Vector(ray_length*cos(yaw*0.017452778)*cos(pitch*0.017452778), ray_length*sin(yaw*0.017452778)*cos(pitch*0.017452778), ray_length*sin(pitch*0.017452778));
+  camera_direction = Vector(ray_length*cos(yaw*deg2rad)*cos(pitch*deg2rad), ray_length*sin(yaw*deg2rad)*cos(pitch*deg2rad), ray_length*sin(pitch*deg2rad));
   return camera_direction;
 
 }
