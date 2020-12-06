@@ -100,10 +100,9 @@ int main(){
 
 
     SDL_GetMouseState(&x, &y);
-    if(i > 50){
-      frame.yaw += x - frame.height/2;
-      frame.pitch -= y - frame.width/2;
-    }
+
+    frame.yaw += x - frame.height/2;
+    frame.pitch -= y - frame.width/2;
 
     const Uint8 *keys = SDL_GetKeyboardState(NULL);
 

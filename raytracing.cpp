@@ -277,7 +277,7 @@ void Frame::CreateWindow(char * title){
 }
 
 
-void Frame::Load(std::string file){
+void Frame::Load(std::string file, float movex, float movey, float movez){
 
   int lines = 0;
   std::string line;
@@ -289,41 +289,73 @@ void Frame::Load(std::string file){
       lines++;//count the number of lines
     }
   }else{
-    std::cout << "Unable to open file";
+    std::cout << "Unable to open file " << file << "\n";
   }
 
   std::ifstream myfile2(file);
 
   int i = 0;
   while (std::getline (myfile2, line)){
-    float triangle[9];
 
-    float red, green, blue;
 
-    for(int j = 0; j < 12; j++){
-      int previous_space = 0;
-      int spacepos = line.find(" ");
+    if(line[0] == '#'){
+      //ignore comments
+    }else if(line[0] == 't' && line[1] == 'r') {
+      //add triangles
 
-      float coord = std::stof(line.substr(previous_space, spacepos));
+      line = line.substr(3, line.size() - 1);
 
-      if(j < 9){
-        triangle[j] = coord;
-      }else if(j == 9){
-        red = coord;
-      }else if(j == 10){
-        green = coord;
-      }else if(j = 11){
-        blue = coord;
+      float triangle[9];
+
+      float red, green, blue;
+
+      for(int j = 0; j < 12; j++){
+        int previous_space = 0;
+        int spacepos = line.find(" ");
+
+        float coord = std::stof(line.substr(previous_space, spacepos));
+
+        if(j < 9){
+          //move for desired transform
+          if(j % 3 == 0){
+            coord = coord + movex;
+          }else if((j - 1) % 3 == 0){
+            coord = coord + movey;
+          }else if((j - 2) % 3 == 0){
+            coord = coord + movez;
+          }
+
+          triangle[j] = coord;
+
+        }else if(j == 9){
+          red = coord;
+        }else if(j == 10){
+          green = coord;
+        }else if(j = 11){
+          blue = coord;
+        }
+
+        previous_space = spacepos;
+
+        line = line.substr(previous_space + 1, line.size());
       }
 
-      previous_space = spacepos;
+      Triangle* t = new Triangle(triangle);
+      t -> SetColor(red, green, blue);
+      triangles.push_back(t);
 
-      line = line.substr(previous_space + 1, line.size());
+    }else if(line[0] == 'l' && line[1] == 'o'){
+
+      line = line.substr(3, line.size());
+      float x = std::stof(line.substr(0, line.find(" ")));
+      line = line.substr(line.find(" ") + 1, line.size());
+      float y = std::stof(line.substr(0, line.find(" ")));
+      line = line.substr(line.find(" ") + 1, line.size());
+      float z = std::stof(line.substr(0, line.find(" ")));
+
+      Load(line.substr(line.find(" ") + 1, line.size()), x + movex, y + movey, z + movez);
+
     }
-
-    Triangle* t = new Triangle(triangle);
-    t -> SetColor(red, green, blue);
-    triangles.push_back(t);
 
     i++;
   }

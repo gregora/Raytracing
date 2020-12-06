@@ -88,7 +88,7 @@ class Frame {
 
     void CreateWindow(char * title);
 
-    void Load(std::string file);
+    void Load(std::string file, float movex = 0, float movey = 0, float movez = 0);
 
   private:
     Vector camera_direction;
