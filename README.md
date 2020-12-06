@@ -14,4 +14,4 @@ First nine lines are for coordinates ```x y z``` of each vertex and the last thr
 The color values should be between 0 and 1.
 
 A white triangle would look something like this:
-```-150, 80, 0, -150, -80, 0, -150, 0, 50 1 1 1```
+```-150 80 0 -150 -80 0 -150 0 50 1 1 1```
