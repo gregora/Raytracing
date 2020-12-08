@@ -1,6 +1,13 @@
 #include <vector>
 #include <SDL2/SDL.h>
 #include <string>
+#include <iostream>
+#include "math.h"
+#include <vector>
+#include <limits>
+#include <fstream>
+#include <algorithm>
+
 
 const float deg2rad = 0.017452778;
 

@@ -1,11 +1,4 @@
 #include "raytracing.h"
-#include <iostream>
-#include "math.h"
-#include <vector>
-#include <limits>
-#include <fstream>
-#include <string>
-#include <algorithm>
 
 Vector::Vector(float setx, float sety, float setz){
 
@@ -16,6 +9,13 @@ Vector::Vector(float setx, float sety, float setz){
   if(x == 0) x = 0.01;
   if(y == 0) y = 0.01;
   if(z == 0) z = 0.01;
+
+  //std::cout << x << std::endl;
+  //std::cout << y << std::endl;
+  //std::cout << z << std::endl;
+
+  if(x > 10000) x = 10000;
+  if(y > 10000) y = 10000;
 
 }
 
@@ -98,12 +98,14 @@ float Triangle::RayHitsTriangle(Vector ray, Vector ray_position){
 
   if((b.y*a.x - b.x*a.y) == 0){
     b.y += 0.01;
+    a.x += 0.01;
   }
 
   float m = (point_of_intersection.y*a.x - point_of_intersection.x*a.y) / (b.y*a.x - b.x*a.y);
-  if(m < 0 || m > 1) return -1;
 
   float n = (point_of_intersection.x - m*b.x)/ a.x;
+
+  if(m < 0 || m > 1) return -1;
   if(n < 0 || n > 1) return -1;
 
   if(n + m > 1) return -1;
@@ -196,7 +198,6 @@ void Frame::Render(float * (*function)(Frame *, int x, int y)){
       float min_triangle_distance = std::numeric_limits<float>::max();
 
       for(int m = 0; m < triangles.size(); m++){
-
         float triangle_distance = triangles[m] -> RayHitsTriangle(current_ray, camera_position);
 
         if(triangle_distance != -1){
