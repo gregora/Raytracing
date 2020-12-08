@@ -102,10 +102,10 @@ float Triangle::RayHitsTriangle(Vector ray, Vector ray_position){
   }
 
   float m = (point_of_intersection.y*a.x - point_of_intersection.x*a.y) / (b.y*a.x - b.x*a.y);
+  if(m < 0 || m > 1) return -1;
+
 
   float n = (point_of_intersection.x - m*b.x)/ a.x;
-
-  if(m < 0 || m > 1) return -1;
   if(n < 0 || n > 1) return -1;
 
   if(n + m > 1) return -1;
@@ -146,7 +146,7 @@ Frame::Frame(const int setwidth, const int setheight){
 }
 
 
-void Frame::Render(float * (*function)(Frame *, int x, int y)){
+void Frame::Render(){
 
   if(yaw > 360) yaw = (int)yaw % 360;
   if(yaw < 0) yaw = 360 - (-(int)yaw % 360);
@@ -155,13 +155,8 @@ void Frame::Render(float * (*function)(Frame *, int x, int y)){
   if(roll > 360) roll = (int)roll % 360;
   if(roll < 0) roll = 360 - (-(int)roll % 360);
 
-
-
-
   GetCameraDirection();
 
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-  SDL_RenderClear(renderer);
 
   Vector cam = camera_direction;
 
@@ -225,6 +220,27 @@ void Frame::Render(float * (*function)(Frame *, int x, int y)){
 
 
 
+
+
+
+    }
+  }
+
+
+
+
+
+}
+
+
+void Frame::ToScreen(float * (*function)(Frame *, int x, int y)){
+
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+  SDL_RenderClear(renderer);
+
+  for(int i = 0; i < width; i++){
+    for(int j = 0; j < height; j++){
+
       if(function != nullptr){
         float * a = function(this, i, j);
 
@@ -236,17 +252,15 @@ void Frame::Render(float * (*function)(Frame *, int x, int y)){
 
       }
 
-
       SDL_SetRenderDrawColor(renderer, frame[0][i][j]*255, frame[1][i][j]*255, frame[2][i][j]*255, 255);
 
       SDL_RenderDrawPoint(renderer, i, j);
 
-
     }
   }
 
-  SDL_RenderPresent(renderer);
 
+  SDL_RenderPresent(renderer);
 
   //close on x
   SDL_Event e;

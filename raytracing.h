@@ -91,7 +91,9 @@ class Frame {
 
     Frame(const int setwidth, const int setheight);
 
-    void Render(float * (*function)(Frame *, int x, int y) = nullptr);
+    void Render();
+
+    void ToScreen(float * (*function)(Frame *, int x, int y) = nullptr);
 
     Vector GetCameraDirection();
 

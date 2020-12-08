@@ -19,8 +19,7 @@ float * Function(Frame * fr, int x, int y){
     test[2] = (fr -> frame[2][x][y]) / (1 + dist);
 
     if(dist >= 0.9){
-
-      test[0] = 0;
+      test[0] = 0.0;
       test[1] = 0.3;
       test[2] = 0.4;
     }
@@ -58,8 +57,8 @@ int main(){
 
   }else{
     file = "scenes/scene1.sc";
-    width = 200;
-    height = 200;
+    width = 100;
+    height = 100;
   }
 
   Frame frame(width, height);
@@ -88,7 +87,8 @@ int main(){
     SDL_WarpMouseInWindow(frame.window, frame.width/2, frame.height/2);
 
     i++;
-    frame.Render(Function);
+    frame.Render();
+    frame.ToScreen(Function);
 
     int x;
     int y;
@@ -101,8 +101,12 @@ int main(){
 
     SDL_GetMouseState(&x, &y);
 
-    frame.yaw += x - frame.height/2;
-    frame.pitch -= y - frame.width/2;
+    if(x < 500) frame.yaw += x - frame.height/2;
+    if(y < 500) frame.pitch -= y - frame.width/2;
+
+
+    if (frame.pitch > 90 && frame.pitch < 180) frame.pitch = 90;
+    if (frame.pitch > 180 && frame.pitch < 270) frame.pitch = 270;
 
     const Uint8 *keys = SDL_GetKeyboardState(NULL);
 
