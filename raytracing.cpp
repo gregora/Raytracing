@@ -6,13 +6,10 @@ Vector::Vector(float setx, float sety, float setz){
   y = sety;
   z = setz;
 
+  //I know this is ugly, but this avoids stuff being divided by 0
   if(x == 0) x = 0.01;
   if(y == 0) y = 0.01;
   if(z == 0) z = 0.01;
-
-  //std::cout << x << std::endl;
-  //std::cout << y << std::endl;
-  //std::cout << z << std::endl;
 
   if(x > 10000) x = 10000;
   if(y > 10000) y = 10000;
@@ -71,6 +68,7 @@ Vector Triangle::Normal(){
 
 }
 
+//intersection between the plane of a triangle and the given ray
 float Triangle::GetRayPlaneIntersection(Vector ray, Vector ray_position){
 
   float rdotn = DotProduct(Normal(), ray);
@@ -96,6 +94,7 @@ float Triangle::RayHitsTriangle(Vector ray, Vector ray_position){
   Vector point_of_intersection;
   point_of_intersection = ray_position + ray*k - position;
 
+  //This is also very ugly, but it again avoids stuff being divided by 0
   if((b.y*a.x - b.x*a.y) == 0){
     b.y += 0.01;
     a.x += 0.01;
@@ -184,15 +183,19 @@ void Frame::Render(){
   sphere_tangent1 = sphere_tangent1 * move_coeficient1;
   sphere_tangent2 = sphere_tangent2 * move_coeficient2;
 
+  //this part of code should be parallelized
   for(int i = 0; i < width; i++){
     for(int j = 0; j < height; j++){
       bool hits = false;
+      //calculate current ray
       Vector current_ray = camera_direction + sphere_tangent1*(i - width/2) + sphere_tangent2*(j - height/2);
 
       int triangle_num = -1;
       float min_triangle_distance = std::numeric_limits<float>::max();
 
+      //iterate through all triangles
       for(int m = 0; m < triangles.size(); m++){
+        //actually cast the ray
         float triangle_distance = triangles[m] -> RayHitsTriangle(current_ray, camera_position);
 
         if(triangle_distance != -1){
@@ -203,6 +206,7 @@ void Frame::Render(){
         }
       }
 
+      //handle if there was no collision
       if(triangle_num != -1){
         frame[0][i][j] = triangles[triangle_num] -> red;
         frame[1][i][j] = triangles[triangle_num] -> green;
@@ -217,11 +221,6 @@ void Frame::Render(){
 
         depth_buffer[i][j] = std::numeric_limits<float>::max();
       }
-
-
-
-
-
 
     }
   }
@@ -242,6 +241,7 @@ void Frame::ToScreen(float * (*function)(Frame *, int x, int y)){
     for(int j = 0; j < height; j++){
 
       if(function != nullptr){
+        //call user given post processing function, and pass it arguments
         float * a = function(this, i, j);
 
         frame[0][i][j] = a[0];
@@ -252,14 +252,14 @@ void Frame::ToScreen(float * (*function)(Frame *, int x, int y)){
 
       }
 
+      //render pixel to screen
       SDL_SetRenderDrawColor(renderer, frame[0][i][j]*255, frame[1][i][j]*255, frame[2][i][j]*255, 255);
-
       SDL_RenderDrawPoint(renderer, i, j);
 
     }
   }
 
-
+  //render frame
   SDL_RenderPresent(renderer);
 
   //close on x
@@ -277,6 +277,7 @@ void Frame::ToScreen(float * (*function)(Frame *, int x, int y)){
 
 Vector Frame::GetCameraDirection(){
 
+  //calculate camera direction ray from yaw, pitch and roll
   camera_direction = Vector(ray_length*cos(yaw*deg2rad)*cos(pitch*deg2rad), ray_length*sin(yaw*deg2rad)*cos(pitch*deg2rad), ray_length*sin(pitch*deg2rad));
   return camera_direction;
 
@@ -303,7 +304,7 @@ void Frame::Load(std::string file, float movex, float movey, float movez){
 
   if (myfile.is_open()){
     while (std::getline (myfile, line)){
-      lines++;//count the number of lines
+      lines++; //count the number of lines in the file
     }
   }else{
     std::cout << "Unable to open file " << file << "\n";
@@ -318,7 +319,7 @@ void Frame::Load(std::string file, float movex, float movey, float movez){
     if(line[0] == '#'){
       //ignore comments
     }else if(line[0] == 't' && line[1] == 'r') {
-      //add triangles
+      //add triangle
 
       line = line.substr(3, line.size() - 1);
 
@@ -362,7 +363,7 @@ void Frame::Load(std::string file, float movex, float movey, float movez){
       triangles.push_back(t);
 
     }else if(line[0] == 'l' && line[1] == 'o'){
-
+      //recursively load another scene
       line = line.substr(3, line.size());
       float x = std::stof(line.substr(0, line.find(" ")));
       line = line.substr(line.find(" ") + 1, line.size());

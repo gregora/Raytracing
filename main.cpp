@@ -74,7 +74,7 @@ int main(){
   frame.camera_position.z = 25;
   frame.pitch = 0;
   frame.yaw = 0;
-  frame.roll = -90;
+  frame.roll = 0;
 
   frame.CreateWindow("Raytracing");
 
