@@ -7,7 +7,7 @@ using namespace std;
 
 float * PostProcessing(Frame * fr, int x, int y){
 
-  int type = 1;
+  int type = 0;
 
   float * test = new float[3];
   float dist = fr -> depth_buffer[x][y];
@@ -43,7 +43,7 @@ float * PostProcessing(Frame * fr, int x, int y){
 int main(){
 
   bool debug  = false;
-  bool enable_controls = false;
+  bool enable_controls = true;
 
   int width, height;
   string file;
