@@ -39,5 +39,5 @@ A scene file can handle three different instructions
 ## How does it look?
 
 The first image is a rendered default scene and the second one is visualized depth buffer.
-![Rendered scene](https://imgur.com/a/iM8oBpz)
-![Depth buffer](https://imgur.com/a/SMluEuc)
+![Rendered scene](https://i.imgur.com/2sYxYl3.png)
+![Depth buffer](https://i.imgur.com/dpidazm.png)
