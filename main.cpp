@@ -60,7 +60,7 @@ int main(){
     cin >> file;
 
   }else{
-    file = "scenes/scene1.sc";
+    file = "scenes/scene1.scene";
     width = 200;
     height = 200;
   }
