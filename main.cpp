@@ -5,7 +5,7 @@
 using namespace std;
 
 
-float * Function(Frame * fr, int x, int y){
+float * PostProcessing(Frame * fr, int x, int y){
 
   int type = 0;
 
@@ -13,6 +13,8 @@ float * Function(Frame * fr, int x, int y){
   float dist = fr -> depth_buffer[x][y];
 
   if(type == 0){
+
+    //change color of pixels considering depth buffer;
 
     test[0] = (fr -> frame[0][x][y]) / (1 + dist*3);
     test[1] = (fr -> frame[1][x][y]) / (1 + dist*3);
@@ -26,6 +28,7 @@ float * Function(Frame * fr, int x, int y){
 
   }else if(type == 1){
 
+    //render depth buffer
     test[0] = 1 / (1 + dist);
     test[1] = 1 / (1 + dist);
     test[2] = 1 / (1 + dist);
@@ -39,7 +42,7 @@ float * Function(Frame * fr, int x, int y){
 
 int main(){
 
-  bool debug  = true;
+  bool debug  = false;
   bool enable_controls = true;
 
   int width, height;
@@ -58,8 +61,8 @@ int main(){
 
   }else{
     file = "scenes/scene1.sc";
-    width = 100;
-    height = 100;
+    width = 200;
+    height = 200;
   }
 
   Frame frame(width, height);
@@ -71,14 +74,17 @@ int main(){
   frame.camera_position.z = 25;
   frame.pitch = 0;
   frame.yaw = 0;
-  frame.roll = 0;
+  frame.roll = -90;
 
   frame.CreateWindow("Raytracing");
 
   int i = 0;
 
-  SDL_ShowCursor(SDL_DISABLE);
-  if(enable_controls) SDL_WarpMouseInWindow(frame.window, frame.width/2, frame.height/2);
+  if(enable_controls){
+    SDL_WarpMouseInWindow(frame.window, frame.width/2, frame.height/2);
+    SDL_ShowCursor(SDL_DISABLE);
+  }
+
 
   float speedz = 0;
 
@@ -88,7 +94,7 @@ int main(){
 
     i++;
     frame.Render();
-    frame.ToScreen(Function);
+    frame.ToScreen(PostProcessing);
 
     int x;
     int y;
