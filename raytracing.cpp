@@ -113,6 +113,14 @@ float Triangle::RayHitsTriangle(Vector ray, Vector ray_position){
 }
 
 
+LightSource::LightSource(float x, float y, float z, float brightness){
+  position.x = x;
+  position.y = y;
+  position.z = z;
+
+  this -> brightness = brightness;
+}
+
 
 float DotProduct(Vector v1, Vector v2){
 
@@ -190,6 +198,7 @@ void Frame::Render(){
   //dispatch threads to render parts of screen
   for(int cpu = 0; cpu < cpu_num; cpu++){
 
+    //due to width being integer divided by cpu_num also being integer, the last portion of the screen is a few pixels wider
     if(cpu + 1 != cpu_num){
       std::thread * t = new std::thread(RenderPart, this, screen_width_per_cpu*cpu, screen_width_per_cpu*(cpu + 1), sphere_tangent1, sphere_tangent2);
       threads[cpu] = t;
@@ -200,14 +209,15 @@ void Frame::Render(){
 
   }
 
+  //wait for all the threads to finish
   for(int cpu = 0; cpu < cpu_num; cpu++){
     threads[cpu] -> join();
   }
 
-
 }
 
 
+//render a part of the frame from given width to given width
 void Frame::RenderPart(Frame * frame, int from_width, int to_width, Vector sphere_tangent1, Vector sphere_tangent2){
 
   for(int i = from_width; i < to_width; i++){
@@ -234,9 +244,67 @@ void Frame::RenderPart(Frame * frame, int from_width, int to_width, Vector spher
 
       //handle if there was no collision
       if(triangle_num != -1){
-        frame -> frame[0][i][j] = frame -> triangles[triangle_num] -> red;
-        frame -> frame[1][i][j] = frame -> triangles[triangle_num] -> green;
-        frame -> frame[2][i][j] = frame -> triangles[triangle_num] -> blue;
+
+        Triangle t = *(frame -> triangles[triangle_num]);
+
+        //get r,g,b values for pixel
+        float r = t.red;
+        float g = t.green;
+        float b = t.blue;
+
+        Vector collision_position;
+        collision_position = current_ray*min_triangle_distance + (frame -> camera_position);
+
+
+        //calculate if the pixel is in shadow
+        float combined_light_power = frame -> ambient_light; //how much light even is there in the scene?
+        float received_light_power = frame -> ambient_light;  //how much light did the pixel get?
+
+        for(int light = 0; light < frame -> light_sources.size(); light ++){
+
+          combined_light_power += (frame->light_sources[light] -> brightness);
+
+          Vector ray_to_light_source;
+          ray_to_light_source = (*(frame -> light_sources[light])).position - collision_position;
+
+          float projection1 = t.Normal().ScalarProjectionOf(current_ray);
+          float projection2 = t.Normal().ScalarProjectionOf(ray_to_light_source);
+
+
+          if(projection1*projection2 > 0){
+
+          }else{
+
+            //iterate through all triangles
+
+            bool is_covered = false;
+
+            for(int m = 0; m < frame -> triangles.size(); m++){
+              if(m != triangle_num){
+                //actually cast the ray
+                float triangle_distance = frame -> triangles[m] -> RayHitsTriangle(ray_to_light_source, collision_position);
+
+                if(triangle_distance != -1){
+                  is_covered = true;
+                  break;
+                }
+
+              }
+            }
+
+            if (!is_covered){
+              received_light_power += (frame -> light_sources[light] -> brightness);
+            }
+
+          }
+        }
+
+
+        float brightness_coef = received_light_power / combined_light_power;
+        frame -> frame[0][i][j] = r * brightness_coef;
+        frame -> frame[1][i][j] = g * brightness_coef;
+        frame -> frame[2][i][j] = b * brightness_coef;
+
 
         frame -> depth_buffer[i][j] = min_triangle_distance;
 
@@ -249,8 +317,10 @@ void Frame::RenderPart(Frame * frame, int from_width, int to_width, Vector spher
       }
     }
   }
-
 }
+
+
+
 
 void Frame::ToScreen(float * (*function)(Frame *, int x, int y)){
 
@@ -261,7 +331,7 @@ void Frame::ToScreen(float * (*function)(Frame *, int x, int y)){
     for(int j = 0; j < height; j++){
 
       if(function != nullptr){
-        //call user given post processing function, and pass it arguments
+        //call a user given post processing function, and pass it arguments
         float * a = function(this, i, j);
 
         frame[0][i][j] = a[0];
@@ -392,6 +462,20 @@ void Frame::Load(std::string file, float movex, float movey, float movez){
       float z = std::stof(line.substr(0, line.find(" ")));
 
       Load(line.substr(line.find(" ") + 1, line.size()), x + movex, y + movey, z + movez);
+
+    }else if(line[0] == 'l' && line[1] == 's'){
+      //light source
+      line = line.substr(3, line.size());
+      float x = std::stof(line.substr(0, line.find(" ")));
+      line = line.substr(line.find(" ") + 1, line.size());
+      float y = std::stof(line.substr(0, line.find(" ")));
+      line = line.substr(line.find(" ") + 1, line.size());
+      float z = std::stof(line.substr(0, line.find(" ")));
+      line = line.substr(line.find(" ") + 1, line.size());
+      float brightness = std::stof(line.substr(0, line.find(" ")));
+
+      LightSource* l = new LightSource(x, y, z, brightness);
+      light_sources.push_back(l);
 
     }
 

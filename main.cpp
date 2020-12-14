@@ -76,6 +76,10 @@ int main(){
   frame.yaw = 0;
   frame.roll = 0;
 
+  frame.ambient_light = 0.5;
+
+  frame.ray_length = 1000;
+
   frame.CreateWindow("Raytracing");
 
   int i = 0;
@@ -94,7 +98,7 @@ int main(){
 
     i++;
     frame.Render();
-    frame.ToScreen(PostProcessing);
+    frame.ToScreen();
 
     int x;
     int y;

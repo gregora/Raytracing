@@ -64,6 +64,16 @@ class Triangle {
 
 };
 
+class LightSource {
+
+  public:
+    Vector position;
+    float brightness = 1;
+
+    LightSource(float x, float y, float z, float brightness = 1);
+
+};
+
 
 float DotProduct(Vector v1, Vector v2);
 
@@ -85,8 +95,11 @@ class Frame {
 
     int width;
     int height;
-    std::vector<Triangle *> triangles;
 
+    std::vector<Triangle *> triangles;
+    std::vector<LightSource *> light_sources;
+
+    float ambient_light = 0;
 
     SDL_Window *window;
     SDL_Renderer *renderer;
