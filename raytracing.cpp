@@ -183,20 +183,46 @@ void Frame::Render(){
   sphere_tangent1 = sphere_tangent1 * move_coeficient1;
   sphere_tangent2 = sphere_tangent2 * move_coeficient2;
 
-  //this part of code should be parallelized
-  for(int i = 0; i < width; i++){
-    for(int j = 0; j < height; j++){
+
+  int screen_width_per_cpu = width / cpu_num;
+  std::thread * threads[cpu_num];
+
+  //dispatch threads to render parts of screen
+  for(int cpu = 0; cpu < cpu_num; cpu++){
+
+    if(cpu + 1 != cpu_num){
+      std::thread * t = new std::thread(RenderPart, this, screen_width_per_cpu*cpu, screen_width_per_cpu*(cpu + 1), sphere_tangent1, sphere_tangent2);
+      threads[cpu] = t;
+    }else{
+      std::thread * t = new std::thread(RenderPart, this, screen_width_per_cpu*cpu, width, sphere_tangent1, sphere_tangent2);
+      threads[cpu] = t;
+    }
+
+  }
+
+  for(int cpu = 0; cpu < cpu_num; cpu++){
+    threads[cpu] -> join();
+  }
+
+
+}
+
+
+void Frame::RenderPart(Frame * frame, int from_width, int to_width, Vector sphere_tangent1, Vector sphere_tangent2){
+
+  for(int i = from_width; i < to_width; i++){
+    for(int j = 0; j < frame -> height; j++){
       bool hits = false;
       //calculate current ray
-      Vector current_ray = camera_direction + sphere_tangent1*(i - width/2) + sphere_tangent2*(j - height/2);
+      Vector current_ray = frame -> camera_direction + sphere_tangent1*(i - frame -> width/2) + sphere_tangent2*(j - frame -> height/2);
 
       int triangle_num = -1;
       float min_triangle_distance = std::numeric_limits<float>::max();
 
       //iterate through all triangles
-      for(int m = 0; m < triangles.size(); m++){
+      for(int m = 0; m < frame -> triangles.size(); m++){
         //actually cast the ray
-        float triangle_distance = triangles[m] -> RayHitsTriangle(current_ray, camera_position);
+        float triangle_distance = frame -> triangles[m] -> RayHitsTriangle(current_ray, frame -> camera_position);
 
         if(triangle_distance != -1){
           if(triangle_distance < min_triangle_distance){
@@ -208,29 +234,23 @@ void Frame::Render(){
 
       //handle if there was no collision
       if(triangle_num != -1){
-        frame[0][i][j] = triangles[triangle_num] -> red;
-        frame[1][i][j] = triangles[triangle_num] -> green;
-        frame[2][i][j] = triangles[triangle_num] -> blue;
+        frame -> frame[0][i][j] = frame -> triangles[triangle_num] -> red;
+        frame -> frame[1][i][j] = frame -> triangles[triangle_num] -> green;
+        frame -> frame[2][i][j] = frame -> triangles[triangle_num] -> blue;
 
-        depth_buffer[i][j] = min_triangle_distance;
+        frame -> depth_buffer[i][j] = min_triangle_distance;
 
       }else{
-        frame[0][i][j] = 0;
-        frame[1][i][j] = 0;
-        frame[2][i][j] = 0;
+        frame -> frame[0][i][j] = 0;
+        frame -> frame[1][i][j] = 0;
+        frame -> frame[2][i][j] = 0;
 
-        depth_buffer[i][j] = std::numeric_limits<float>::max();
+        frame -> depth_buffer[i][j] = std::numeric_limits<float>::max();
       }
-
     }
   }
 
-
-
-
-
 }
-
 
 void Frame::ToScreen(float * (*function)(Frame *, int x, int y)){
 

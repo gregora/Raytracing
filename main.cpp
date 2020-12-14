@@ -108,8 +108,8 @@ int main(){
     SDL_GetMouseState(&x, &y);
 
     if(enable_controls){
-      if(x < 500) frame.yaw += x - frame.height/2;
-      if(y < 500) frame.pitch -= y - frame.width/2;
+      if(x < 500) frame.yaw += x - frame.width/2;
+      if(y < 500) frame.pitch -= y - frame.height/2;
     }
 
     if (frame.pitch > 90 && frame.pitch < 180) frame.pitch = 90;

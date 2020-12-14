@@ -1,15 +1,17 @@
+#include "math.h"
 #include <vector>
 #include <SDL2/SDL.h>
 #include <string>
 #include <iostream>
-#include "math.h"
 #include <vector>
 #include <limits>
 #include <fstream>
 #include <algorithm>
+#include <thread>
 
 
 const float deg2rad = 0.017452778;
+const unsigned int cpu_num = std::thread::hardware_concurrency();
 
 class Vector {
 
@@ -92,6 +94,8 @@ class Frame {
     Frame(const int setwidth, const int setheight);
 
     void Render();
+
+    static void RenderPart(Frame * frame, int from_width, int to_width, Vector sphere_tangent1, Vector sphere_tangent2);
 
     void ToScreen(float * (*function)(Frame *, int x, int y) = nullptr);
 

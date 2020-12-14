@@ -1,1 +1,1 @@
-g++ main.cpp raytracing.cpp -lSDL2 -o main.out
+g++ main.cpp raytracing.cpp -lSDL2 -pthread -o main.out
