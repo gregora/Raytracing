@@ -11,9 +11,6 @@ Vector::Vector(float setx, float sety, float setz){
   if(y == 0) y = 0.01;
   if(z == 0) z = 0.01;
 
-  if(x > 10000) x = 10000;
-  if(y > 10000) y = 10000;
-
 }
 
 Vector Vector::operator* (float n){
@@ -275,15 +272,16 @@ void Frame::RenderPart(Frame * frame, int from_width, int to_width, Vector spher
 
           }else{
 
-            //iterate through all triangles
-
+            //iterate through all the triangles
             bool is_covered = false;
 
             for(int m = 0; m < frame -> triangles.size(); m++){
               if(m != triangle_num){
+
                 //actually cast the ray
                 float triangle_distance = frame -> triangles[m] -> RayHitsTriangle(ray_to_light_source, collision_position);
 
+                //if pixel is obscured by a triangle, no light from the light source will hit it
                 if(triangle_distance != -1){
                   is_covered = true;
                   break;
@@ -292,14 +290,21 @@ void Frame::RenderPart(Frame * frame, int from_width, int to_width, Vector spher
               }
             }
 
+            //if pixel is not obscured, calculate its brightness
             if (!is_covered){
-              received_light_power += (frame -> light_sources[light] -> brightness);
+              float bounce_ray_distance = ray_to_light_source.Length() + (collision_position - (frame -> camera_position)).Length(); //calculate distance from the observer
+              float dumping_coef = frame -> light_dumping_coefficient; //get dumping_coef
+
+              bounce_ray_distance = bounce_ray_distance * bounce_ray_distance; //inverse square law for light intensity
+              bounce_ray_distance =  bounce_ray_distance * dumping_coef/1000000; //apply dumping coefficient
+
+              received_light_power += (frame -> light_sources[light] -> brightness) / (1 + bounce_ray_distance); //calculate actual intensity
             }
 
           }
         }
 
-
+        //calculate pixel color from all 
         float brightness_coef = received_light_power / combined_light_power;
         frame -> frame[0][i][j] = r * brightness_coef;
         frame -> frame[1][i][j] = g * brightness_coef;

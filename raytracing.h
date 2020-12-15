@@ -100,6 +100,7 @@ class Frame {
     std::vector<LightSource *> light_sources;
 
     float ambient_light = 0;
+    float light_dumping_coefficient = 0.2;
 
     SDL_Window *window;
     SDL_Renderer *renderer;

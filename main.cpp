@@ -43,7 +43,7 @@ float * PostProcessing(Frame * fr, int x, int y){
 int main(){
 
   bool debug  = false;
-  bool enable_controls = true;
+  bool enable_controls = false;
 
   int width, height;
   string file;
@@ -61,24 +61,22 @@ int main(){
 
   }else{
     file = "scenes/scene1.scene";
-    width = 200;
-    height = 200;
+    width = 100;
+    height = 100;
   }
 
   Frame frame(width, height);
 
-
-
   frame.Load(file);
 
   frame.camera_position.z = 25;
-  frame.pitch = 0;
   frame.yaw = 0;
+  frame.pitch = -30;
   frame.roll = 0;
 
   frame.ambient_light = 0.5;
 
-  frame.ray_length = 1000;
+  frame.ray_length = 100000;
 
   frame.CreateWindow("Raytracing");
 
@@ -97,6 +95,7 @@ int main(){
     if(enable_controls) SDL_WarpMouseInWindow(frame.window, frame.width/2, frame.height/2);
 
     i++;
+    frame.camera_position = Vector(0, 0, 400);
     frame.Render();
     frame.ToScreen();
 
@@ -106,7 +105,7 @@ int main(){
 
 
     frame.camera_position.z += speedz;
-    if(frame.camera_position.z < 25) frame.camera_position.z = 25;
+    if(frame.camera_position.z < 2) frame.camera_position.z = 2;
 
 
     SDL_GetMouseState(&x, &y);
