@@ -15,7 +15,6 @@ float * PostProcessing(Frame * fr, int x, int y){
   if(type == 0){
 
     //change color of pixels considering depth buffer;
-
     test[0] = (fr -> frame[0][x][y]) / (1 + dist*3);
     test[1] = (fr -> frame[1][x][y]) / (1 + dist*3);
     test[2] = (fr -> frame[2][x][y]) / (1 + dist*3);
@@ -43,7 +42,7 @@ float * PostProcessing(Frame * fr, int x, int y){
 int main(){
 
   bool debug  = false;
-  bool enable_controls = false;
+  bool enable_controls = true;
 
   int width, height;
   string file;
@@ -92,19 +91,25 @@ int main(){
 
   while(true){
 
+    i++;
+
+
+    //rotate light source
+    frame.light_sources[0] -> position = Vector(2000*sin(i * deg2rad), 2000*cos(i * deg2rad), 600);
+
     if(enable_controls) SDL_WarpMouseInWindow(frame.window, frame.width/2, frame.height/2);
 
-    i++;
-    frame.camera_position = Vector(0, 0, 400);
     frame.Render();
-    frame.ToScreen();
+    frame.ToScreen(PostProcessing);
 
     int x;
     int y;
     speedz -= 1;
 
-
+    //add gravity
     frame.camera_position.z += speedz;
+
+    //fix observer height to 2m
     if(frame.camera_position.z < 2) frame.camera_position.z = 2;
 
 
@@ -115,6 +120,7 @@ int main(){
       if(y < 500) frame.pitch -= y - frame.height/2;
     }
 
+    //max pitch
     if (frame.pitch > 90 && frame.pitch < 180) frame.pitch = 90;
     if (frame.pitch > 180 && frame.pitch < 270) frame.pitch = 270;
 

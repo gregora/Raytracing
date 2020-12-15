@@ -8,6 +8,7 @@ The code code is written for Linux, but if you compile it, it should work on win
 
 ## TODO
 * Fix a bug with random lines being shown
+* Fix shadow bugs
 * Bouncing rays of triangles
 * ~~Parallelize rendering~~
 * ~~Check if a certain pixel is in a shadow~~
