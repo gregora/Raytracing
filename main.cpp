@@ -19,11 +19,6 @@ float * PostProcessing(Frame * fr, int x, int y){
     test[1] = (fr -> frame[1][x][y]) / (1 + dist*3);
     test[2] = (fr -> frame[2][x][y]) / (1 + dist*3);
 
-    if(dist >= 0.9){
-      test[0] = 0.0;
-      test[1] = 0.3;
-      test[2] = 0.4;
-    }
 
   }else if(type == 1){
 
@@ -75,7 +70,9 @@ int main(){
 
   frame.ambient_light = 0.5;
 
-  frame.ray_length = 100000;
+  frame.ray_length = 1000000;
+
+  frame.SetSkyColor(0.2, 0.8, 1);
 
   frame.CreateWindow("Raytracing");
 
@@ -100,7 +97,7 @@ int main(){
     if(enable_controls) SDL_WarpMouseInWindow(frame.window, frame.width/2, frame.height/2);
 
     frame.Render();
-    frame.ToScreen(PostProcessing);
+    frame.ToScreen();
 
     int x;
     int y;

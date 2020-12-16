@@ -52,7 +52,7 @@ class Triangle {
     float green;
     float blue;
 
-    float reflectiveness = 0.3;
+    float reflectiveness = 0;
 
     Triangle(float* points);
 
@@ -104,6 +104,10 @@ class Frame {
     float ambient_light = 0;
     float light_dumping_coefficient = 0.2;
 
+    float sky_red = 0;
+    float sky_green = 0;
+    float sky_blue = 0;
+
     int reflections_number = 1;
 
     SDL_Window *window;
@@ -111,11 +115,13 @@ class Frame {
 
     Frame(const int setwidth, const int setheight);
 
+    void SetSkyColor(float red, float green, float blue);
+
     void Render();
 
     static void RenderPart(Frame * frame, int from_width, int to_width, Vector sphere_tangent1, Vector sphere_tangent2);
 
-    static float * GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int reflections, int avoid_triangle = -1);
+    static float * GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int reflections, int avoid_triangle = -1); //there has to be an avoid_triangle argument, for reflection to not treat triangle itself as an obsticle
 
     void ToScreen(float * (*function)(Frame *, int x, int y) = nullptr);
 

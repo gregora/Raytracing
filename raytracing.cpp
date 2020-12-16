@@ -149,6 +149,12 @@ Frame::Frame(const int setwidth, const int setheight){
 
 }
 
+void Frame::SetSkyColor(float red, float green, float blue){
+  sky_red = red;
+  sky_green = green;
+  sky_blue = blue;
+}
+
 
 void Frame::Render(){
 
@@ -343,8 +349,10 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
       float k = - DotProduct(t_normal, ray)/DotProduct(t_normal, t_normal);
       Vector bounce_ray = (ray + t_normal*k)*2 - ray;
 
+      //get reflection colors by recursively calling GetPixelColor function
       float * reflection_colors = GetPixelColor(frame, bounce_ray, collision_position, reflections - 1, triangle_num);
 
+      //calculate the new colors
       return_colors[0] = (1 - triangle_reflectiveness)*return_colors[0] + triangle_reflectiveness*reflection_colors[0];
       return_colors[1] = (1 - triangle_reflectiveness)*return_colors[1] + triangle_reflectiveness*reflection_colors[1];
       return_colors[2] = (1 - triangle_reflectiveness)*return_colors[2] + triangle_reflectiveness*reflection_colors[2];
@@ -353,9 +361,9 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
     }
 
   }else{
-    return_colors[0] = 0;
-    return_colors[1] = 0;
-    return_colors[2] = 0;
+    return_colors[0] = frame -> sky_red;
+    return_colors[1] = frame -> sky_green;
+    return_colors[2] = frame -> sky_blue;
 
     return_colors[3] = 0;
   }
@@ -448,23 +456,28 @@ void Frame::Load(std::string file, float movex, float movey, float movez){
   int i = 0;
   while (std::getline (myfile2, line)){
 
-
     if(line[0] == '#'){
       //ignore comments
     }else if(line[0] == 't' && line[1] == 'r') {
       //add triangle
+
+      if(line[line.size() - 1] != ' '){
+        line.append(" ");
+      }
 
       line = line.substr(3, line.size() - 1);
 
       float triangle[9];
 
       float red, green, blue;
+      float reflectiveness = 0;
+      int j = 0;
 
-      for(int j = 0; j < 12; j++){
-        int previous_space = 0;
+      while(line.find(" ") != std::string::npos){
+
         int spacepos = line.find(" ");
 
-        float coord = std::stof(line.substr(previous_space, spacepos));
+        float coord = std::stof(line.substr(0, spacepos));
 
         if(j < 9){
           //move for desired transform
@@ -482,17 +495,20 @@ void Frame::Load(std::string file, float movex, float movey, float movez){
           red = coord;
         }else if(j == 10){
           green = coord;
-        }else if(j = 11){
+        }else if(j == 11){
           blue = coord;
+        }else if(j == 12){
+          reflectiveness = coord;
         }
 
-        previous_space = spacepos;
+        line = line.substr(spacepos + 1, line.size());
+        j++;
 
-        line = line.substr(previous_space + 1, line.size());
       }
 
       Triangle* t = new Triangle(triangle);
       t -> SetColor(red, green, blue);
+      t -> reflectiveness = reflectiveness;
       triangles.push_back(t);
 
     }else if(line[0] == 'l' && line[1] == 'o'){
