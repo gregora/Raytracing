@@ -223,7 +223,7 @@ void Frame::RenderPart(Frame * frame, int from_width, int to_width, Vector spher
       //calculate current ray
       Vector current_ray = frame -> camera_direction + sphere_tangent1*(i - frame -> width/2) + sphere_tangent2*(j - frame -> height/2);
 
-      float * colors = GetPixelColor(frame, current_ray, 1);
+      float * colors = GetPixelColor(frame, current_ray, frame -> camera_position, frame -> reflections_number + 1);
 
       frame -> frame[0][i][j] = colors[0];
       frame -> frame[1][i][j] = colors[1];
@@ -239,7 +239,7 @@ void Frame::RenderPart(Frame * frame, int from_width, int to_width, Vector spher
 
 
 
-float * Frame::GetPixelColor(Frame * frame, Vector ray, int reflections){
+float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int reflections, int avoid_triangle){
 
   float * return_colors = new float[4]; //return r,g,b and depth
 
@@ -251,9 +251,9 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, int reflections){
   //iterate through all triangles
   for(int m = 0; m < frame -> triangles.size(); m++){
     //actually cast the ray
-    float triangle_distance = frame -> triangles[m] -> RayHitsTriangle(ray, frame -> camera_position);
+    float triangle_distance = frame -> triangles[m] -> RayHitsTriangle(ray, ray_position);
 
-    if(triangle_distance != -1){
+    if(triangle_distance != -1 && m != avoid_triangle){
       if(triangle_distance < min_triangle_distance){
         triangle_num = m;
         min_triangle_distance = triangle_distance;
@@ -272,7 +272,7 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, int reflections){
     float b = t.blue;
 
     Vector collision_position;
-    collision_position = ray*min_triangle_distance + (frame -> camera_position);
+    collision_position = ray*min_triangle_distance + (ray_position);
 
 
     //calculate if the pixel is in shadow
@@ -314,7 +314,7 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, int reflections){
 
         //if pixel is not obscured, calculate its brightness
         if (!is_covered){
-          float bounce_ray_distance = ray_to_light_source.Length() + (collision_position - (frame -> camera_position)).Length(); //calculate distance from the observer
+          float bounce_ray_distance = ray_to_light_source.Length() + (collision_position - ray_position).Length(); //calculate distance from the observer
           float dumping_coef = frame -> light_dumping_coefficient; //get dumping_coef
 
           bounce_ray_distance = bounce_ray_distance * bounce_ray_distance; //inverse square law for light intensity
@@ -333,6 +333,24 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, int reflections){
     return_colors[2] = b * brightness_coef;
 
     return_colors[3] = min_triangle_distance;
+
+    float triangle_reflectiveness = t.reflectiveness; //t is the triangle with which the ray collided
+
+    //check if we need to cast another ray for reflection
+    if(reflections > 1 && triangle_reflectiveness > 0){
+
+      Vector t_normal = t.Normal();
+      float k = - DotProduct(t_normal, ray)/DotProduct(t_normal, t_normal);
+      Vector bounce_ray = (ray + t_normal*k)*2 - ray;
+
+      float * reflection_colors = GetPixelColor(frame, bounce_ray, collision_position, reflections - 1, triangle_num);
+
+      return_colors[0] = (1 - triangle_reflectiveness)*return_colors[0] + triangle_reflectiveness*reflection_colors[0];
+      return_colors[1] = (1 - triangle_reflectiveness)*return_colors[1] + triangle_reflectiveness*reflection_colors[1];
+      return_colors[2] = (1 - triangle_reflectiveness)*return_colors[2] + triangle_reflectiveness*reflection_colors[2];
+
+      delete(reflection_colors);
+    }
 
   }else{
     return_colors[0] = 0;

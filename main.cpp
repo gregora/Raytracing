@@ -42,7 +42,7 @@ float * PostProcessing(Frame * fr, int x, int y){
 int main(){
 
   bool debug  = false;
-  bool enable_controls = true;
+  bool enable_controls = false;
 
   int width, height;
   string file;
@@ -112,12 +112,14 @@ int main(){
     //fix observer height to 2m
     if(frame.camera_position.z < 2) frame.camera_position.z = 2;
 
-
     SDL_GetMouseState(&x, &y);
 
     if(enable_controls){
       if(x < 500) frame.yaw += x - frame.width/2;
       if(y < 500) frame.pitch -= y - frame.height/2;
+    }else{
+      frame.camera_position.z = 300;
+      frame.pitch = -10;
     }
 
     //max pitch

@@ -52,6 +52,8 @@ class Triangle {
     float green;
     float blue;
 
+    float reflectiveness = 0.3;
+
     Triangle(float* points);
 
     Vector Normal();
@@ -102,6 +104,8 @@ class Frame {
     float ambient_light = 0;
     float light_dumping_coefficient = 0.2;
 
+    int reflections_number = 1;
+
     SDL_Window *window;
     SDL_Renderer *renderer;
 
@@ -111,7 +115,7 @@ class Frame {
 
     static void RenderPart(Frame * frame, int from_width, int to_width, Vector sphere_tangent1, Vector sphere_tangent2);
 
-    static float * GetPixelColor(Frame * frame, Vector ray, int reflections);
+    static float * GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int reflections, int avoid_triangle = -1);
 
     void ToScreen(float * (*function)(Frame *, int x, int y) = nullptr);
 
