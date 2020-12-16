@@ -9,8 +9,8 @@ The code code is written for Linux, but if you compile it, it should work on win
 ## TODO
 * Fix a bug with random lines being shown
 * Fix shadow bugs
-* Bouncing rays of triangles
 * Add spotlight light sources
+* ~~Add reflections~~
 * ~~Parallelize rendering~~
 * ~~Check if a certain pixel is in a shadow~~
 
@@ -43,5 +43,5 @@ A scene file can handle three different instructions
 ## How does it look?
 
 The first image is a rendered default scene and the second one is visualized depth buffer.
-![Rendered scene](https://i.imgur.com/2sYxYl3.png)
+![Rendered scene](https://i.imgur.com/LNzGIJ2.png)
 ![Depth buffer](https://i.imgur.com/dpidazm.png)
