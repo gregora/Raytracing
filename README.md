@@ -10,6 +10,7 @@ The code code is written for Linux, but if you compile it, it should work on win
 * Fix a bug with random lines being shown
 * Fix shadow bugs
 * Bouncing rays of triangles
+* Add spotlight light sources
 * ~~Parallelize rendering~~
 * ~~Check if a certain pixel is in a shadow~~
 

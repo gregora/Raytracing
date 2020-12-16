@@ -111,6 +111,8 @@ class Frame {
 
     static void RenderPart(Frame * frame, int from_width, int to_width, Vector sphere_tangent1, Vector sphere_tangent2);
 
+    static float * GetPixelColor(Frame * frame, Vector ray, int reflections);
+
     void ToScreen(float * (*function)(Frame *, int x, int y) = nullptr);
 
     Vector GetCameraDirection();

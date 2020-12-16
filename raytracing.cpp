@@ -219,112 +219,132 @@ void Frame::RenderPart(Frame * frame, int from_width, int to_width, Vector spher
 
   for(int i = from_width; i < to_width; i++){
     for(int j = 0; j < frame -> height; j++){
-      bool hits = false;
+
       //calculate current ray
       Vector current_ray = frame -> camera_direction + sphere_tangent1*(i - frame -> width/2) + sphere_tangent2*(j - frame -> height/2);
 
-      int triangle_num = -1;
-      float min_triangle_distance = std::numeric_limits<float>::max();
+      float * colors = GetPixelColor(frame, current_ray, 1);
 
-      //iterate through all triangles
-      for(int m = 0; m < frame -> triangles.size(); m++){
-        //actually cast the ray
-        float triangle_distance = frame -> triangles[m] -> RayHitsTriangle(current_ray, frame -> camera_position);
+      frame -> frame[0][i][j] = colors[0];
+      frame -> frame[1][i][j] = colors[1];
+      frame -> frame[2][i][j] = colors[2];
 
-        if(triangle_distance != -1){
-          if(triangle_distance < min_triangle_distance){
-            triangle_num = m;
-            min_triangle_distance = triangle_distance;
-          }
-        }
-      }
+      frame -> depth_buffer[i][j] = colors[3];
 
-      //handle if there was no collision
-      if(triangle_num != -1){
+      delete(colors);
 
-        Triangle t = *(frame -> triangles[triangle_num]);
-
-        //get r,g,b values for pixel
-        float r = t.red;
-        float g = t.green;
-        float b = t.blue;
-
-        Vector collision_position;
-        collision_position = current_ray*min_triangle_distance + (frame -> camera_position);
-
-
-        //calculate if the pixel is in shadow
-        float combined_light_power = frame -> ambient_light; //how much light even is there in the scene?
-        float received_light_power = frame -> ambient_light;  //how much light did the pixel get?
-
-        for(int light = 0; light < frame -> light_sources.size(); light ++){
-
-          combined_light_power += (frame->light_sources[light] -> brightness);
-
-          Vector ray_to_light_source;
-          ray_to_light_source = (*(frame -> light_sources[light])).position - collision_position;
-
-          float projection1 = t.Normal().ScalarProjectionOf(current_ray);
-          float projection2 = t.Normal().ScalarProjectionOf(ray_to_light_source);
-
-
-          if(projection1*projection2 > 0){
-
-          }else{
-
-            //iterate through all the triangles
-            bool is_covered = false;
-
-            for(int m = 0; m < frame -> triangles.size(); m++){
-              if(m != triangle_num){
-
-                //actually cast the ray
-                float triangle_distance = frame -> triangles[m] -> RayHitsTriangle(ray_to_light_source, collision_position);
-
-                //if pixel is obscured by a triangle, no light from the light source will hit it
-                if(triangle_distance != -1){
-                  is_covered = true;
-                  break;
-                }
-
-              }
-            }
-
-            //if pixel is not obscured, calculate its brightness
-            if (!is_covered){
-              float bounce_ray_distance = ray_to_light_source.Length() + (collision_position - (frame -> camera_position)).Length(); //calculate distance from the observer
-              float dumping_coef = frame -> light_dumping_coefficient; //get dumping_coef
-
-              bounce_ray_distance = bounce_ray_distance * bounce_ray_distance; //inverse square law for light intensity
-              bounce_ray_distance =  bounce_ray_distance * dumping_coef/1000000; //apply dumping coefficient
-
-              received_light_power += (frame -> light_sources[light] -> brightness) / (1 + bounce_ray_distance); //calculate actual intensity
-            }
-
-          }
-        }
-
-        //calculate pixel color from all 
-        float brightness_coef = received_light_power / combined_light_power;
-        frame -> frame[0][i][j] = r * brightness_coef;
-        frame -> frame[1][i][j] = g * brightness_coef;
-        frame -> frame[2][i][j] = b * brightness_coef;
-
-
-        frame -> depth_buffer[i][j] = min_triangle_distance;
-
-      }else{
-        frame -> frame[0][i][j] = 0;
-        frame -> frame[1][i][j] = 0;
-        frame -> frame[2][i][j] = 0;
-
-        frame -> depth_buffer[i][j] = std::numeric_limits<float>::max();
-      }
     }
   }
 }
 
 
+
+float * Frame::GetPixelColor(Frame * frame, Vector ray, int reflections){
+
+  float * return_colors = new float[4]; //return r,g,b and depth
+
+  bool hits = false;
+
+  int triangle_num = -1;
+  float min_triangle_distance = std::numeric_limits<float>::max();
+
+  //iterate through all triangles
+  for(int m = 0; m < frame -> triangles.size(); m++){
+    //actually cast the ray
+    float triangle_distance = frame -> triangles[m] -> RayHitsTriangle(ray, frame -> camera_position);
+
+    if(triangle_distance != -1){
+      if(triangle_distance < min_triangle_distance){
+        triangle_num = m;
+        min_triangle_distance = triangle_distance;
+      }
+    }
+  }
+
+  //handle if there was no collision
+  if(triangle_num != -1){
+
+    Triangle t = *(frame -> triangles[triangle_num]);
+
+    //get r,g,b values for pixel
+    float r = t.red;
+    float g = t.green;
+    float b = t.blue;
+
+    Vector collision_position;
+    collision_position = ray*min_triangle_distance + (frame -> camera_position);
+
+
+    //calculate if the pixel is in shadow
+    float combined_light_power = frame -> ambient_light; //how much light even is there in the scene?
+    float received_light_power = frame -> ambient_light;  //how much light did the pixel get?
+
+    for(int light = 0; light < frame -> light_sources.size(); light ++){
+
+      combined_light_power += (frame->light_sources[light] -> brightness);
+
+      Vector ray_to_light_source;
+      ray_to_light_source = (*(frame -> light_sources[light])).position - collision_position;
+
+      float projection1 = t.Normal().ScalarProjectionOf(ray);
+      float projection2 = t.Normal().ScalarProjectionOf(ray_to_light_source);
+
+
+      if(projection1*projection2 > 0){
+
+      }else{
+
+        //iterate through all the triangles
+        bool is_covered = false;
+
+        for(int m = 0; m < frame -> triangles.size(); m++){
+          if(m != triangle_num){
+
+            //actually cast the ray
+            float triangle_distance = frame -> triangles[m] -> RayHitsTriangle(ray_to_light_source, collision_position);
+
+            //if pixel is obscured by a triangle, no light from the light source will hit it
+            if(triangle_distance != -1){
+              is_covered = true;
+              break;
+            }
+
+          }
+        }
+
+        //if pixel is not obscured, calculate its brightness
+        if (!is_covered){
+          float bounce_ray_distance = ray_to_light_source.Length() + (collision_position - (frame -> camera_position)).Length(); //calculate distance from the observer
+          float dumping_coef = frame -> light_dumping_coefficient; //get dumping_coef
+
+          bounce_ray_distance = bounce_ray_distance * bounce_ray_distance; //inverse square law for light intensity
+          bounce_ray_distance =  bounce_ray_distance * dumping_coef/1000000; //apply dumping coefficient
+
+          received_light_power += (frame -> light_sources[light] -> brightness) / (1 + bounce_ray_distance); //calculate actual intensity
+        }
+
+      }
+    }
+
+    //calculate pixel color from all
+    float brightness_coef = received_light_power / combined_light_power;
+    return_colors[0] = r * brightness_coef;
+    return_colors[1] = g * brightness_coef;
+    return_colors[2] = b * brightness_coef;
+
+    return_colors[3] = min_triangle_distance;
+
+  }else{
+    return_colors[0] = 0;
+    return_colors[1] = 0;
+    return_colors[2] = 0;
+
+    return_colors[3] = 0;
+  }
+
+  return return_colors;
+
+}
 
 
 void Frame::ToScreen(float * (*function)(Frame *, int x, int y)){
