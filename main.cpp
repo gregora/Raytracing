@@ -7,7 +7,7 @@ using namespace std;
 
 float * PostProcessing(Frame * fr, int x, int y){
 
-  int type = 1;
+  int type = 0;
 
   float * pixel = new float[3];
   float dist = fr -> depth_buffer[x][y];
