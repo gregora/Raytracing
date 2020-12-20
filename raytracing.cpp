@@ -1,15 +1,10 @@
 #include "raytracing.h"
 
-Vector::Vector(float setx, float sety, float setz){
+Vector::Vector(float x, float y, float z){
 
-  x = setx;
-  y = sety;
-  z = setz;
-
-  //I know this is ugly, but this avoids stuff being divided by 0
-  if(x == 0) x = 0.01;
-  if(y == 0) y = 0.01;
-  if(z == 0) z = 0.01;
+  this -> x = x;
+  this -> y = y;
+  this -> z = z;
 
 }
 
@@ -69,6 +64,8 @@ Vector Triangle::Normal(){
 float Triangle::GetRayPlaneIntersection(Vector ray, Vector ray_position){
 
   float rdotn = DotProduct(Normal(), ray);
+
+  if(rdotn == 0) return -1;
   return DotProduct(Normal(), position - ray_position) / rdotn;
 
 }
@@ -90,20 +87,45 @@ float Triangle::RayHitsTriangle(Vector ray, Vector ray_position){
 
   Vector point_of_intersection;
   point_of_intersection = ray_position + ray*k - position;
+  Vector p = point_of_intersection;
 
-  //This is also very ugly, but it again avoids stuff being divided by 0
-  if((b.y*a.x - b.x*a.y) == 0){
-    b.y += 0.01;
-    a.x += 0.01;
+  float m,n;
+
+  //calculate n and m scales but avoid dividing by 0
+  if(a.x != 0){
+
+    if(a.x*b.y - a.y*b.x != 0){
+      m = (p.y*a.x - p.x*a.y) / (b.y*a.x - b.x*a.y);
+    }else{
+      m = (a.x*p.z - a.z*p.x) / (a.x*b.z - a.z*b.x);
+    }
+
+    if(m < 0 || m > 1) return -1;
+    n = (p.x - m*b.x)/ a.x;
+  }else if(a.y != 0){
+
+    if(a.y*b.x - a.x*b.y != 0){
+      m = (a.y*p.x - a.x*p.y) / (a.y*b.x - a.x*b.y);
+    }else{
+      m = (a.y*p.z - a.z*p.y) / (a.y*b.z - a.z*b.y);
+    }
+
+    if(m < 0 || m > 1) return -1;
+    n = (p.y - b.y*m)/a.y;
+  }else{
+
+    if(a.z*b.x - a.x*b.z != 0){
+      m = (a.z*p.x - a.x*p.z) / (a.z*b.x - a.x*b.z);
+    }else{
+      m = (a.z*p.y - a.y*p.z) / (a.z*b.y - a.y*b.z);
+    }
+
+    if(m < 0 || m > 1) return -1;
+    n = (p.z - b.z*m)/a.z;
+
   }
 
-  float m = (point_of_intersection.y*a.x - point_of_intersection.x*a.y) / (b.y*a.x - b.x*a.y);
-  if(m < 0 || m > 1) return -1;
-
-
-  float n = (point_of_intersection.x - m*b.x)/ a.x;
   if(n < 0 || n > 1) return -1;
-
   if(n + m > 1) return -1;
 
   return k;
@@ -123,6 +145,10 @@ float DotProduct(Vector v1, Vector v2){
 
   return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
 
+}
+
+float AngleBetweenVectors(Vector v1, Vector v2){
+  return acos(DotProduct(v1, v2) / (v1.Length() * v2.Length()));
 }
 
 

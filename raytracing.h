@@ -16,11 +16,11 @@ const unsigned int cpu_num = std::thread::hardware_concurrency();
 class Vector {
 
   public:
-    float x = 0.01f;
-    float y = 0.01f;
-    float z = 0.01f;
+    float x = 0;
+    float y = 0;
+    float z = 0;
 
-    Vector(float setx = 0, float sety = 0, float setz = 0);
+    Vector(float x = 0, float y = 0, float z = 0);
 
     Vector operator* (float n);
 
@@ -78,6 +78,8 @@ class LightSource {
 
 
 float DotProduct(Vector v1, Vector v2);
+
+float AngleBetweenVectors(Vector v1, Vector v2);
 
 
 class Frame {

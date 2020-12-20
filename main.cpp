@@ -37,7 +37,7 @@ float * PostProcessing(Frame * fr, int x, int y){
 int main(){
 
   bool debug  = false;
-  bool enable_controls = false;
+  bool enable_controls = true;
 
   int width, height;
   string file;

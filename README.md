@@ -7,12 +7,12 @@ For now, the engine only rasterizes trianges and creates depth buffer.
 The code code is written for Linux, but if you compile it, it should work on windows as well.
 
 ## TODO
-* Fix a bug with random lines being shown
-* Fix shadow bugs
 * Add spotlight light sources
 * ~~Add reflections~~
 * ~~Parallelize rendering~~
-* ~~Check if a certain pixel is in a shadow~~
+* ~~Add shadows~~
+* ~~Fix a bug with random lines being shown~~
+* ~~Fix shadow bugs~~
 
 ## Dependencies
 * SDL2
