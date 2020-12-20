@@ -197,6 +197,7 @@ void Frame::Render(){
   Vector cam = camera_direction;
 
   //tangents are calculated, so that we know in what directions to shoot the rays
+  if(camera_direction.y == 0) camera_direction.y = 0.01f;
   float t1 = - sqrt(1 / (1 + camera_direction.x*camera_direction.x / (camera_direction.y * camera_direction.y)));
   if(yaw > 180) t1 = -t1;
   float t2 = - t1 * camera_direction.x / camera_direction.y;
@@ -391,7 +392,7 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
     return_colors[1] = frame -> sky_green;
     return_colors[2] = frame -> sky_blue;
 
-    return_colors[3] = 0;
+    return_colors[3] = std::numeric_limits<float>::max();
   }
 
   return return_colors;

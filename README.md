@@ -2,7 +2,7 @@
 
 A 3D raytracing engine written in C++.
 Currently in developement.
-For now, the engine only rasterizes trianges and creates depth buffer.
+Engine supports rasterization, shadows and reflections.
 
 The code code is written for Linux, but if you compile it, it should work on windows as well.
 
@@ -43,5 +43,5 @@ A scene file can handle three different instructions
 ## How does it look?
 
 The first image is a rendered default scene and the second one is visualized depth buffer.
-![Rendered scene](https://i.imgur.com/LNzGIJ2.png)
-![Depth buffer](https://i.imgur.com/dpidazm.png)
+![Rendered scene](https://i.imgur.com/Mf7az6c.png)
+![Depth buffer](https://i.imgur.com/aM2qoSp.png)

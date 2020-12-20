@@ -7,30 +7,28 @@ using namespace std;
 
 float * PostProcessing(Frame * fr, int x, int y){
 
-  int type = 0;
+  int type = 1;
 
-  float * test = new float[3];
+  float * pixel = new float[3];
   float dist = fr -> depth_buffer[x][y];
 
   if(type == 0){
-
-    //change color of pixels considering depth buffer;
-    test[0] = (fr -> frame[0][x][y]) / (1 + dist*3);
-    test[1] = (fr -> frame[1][x][y]) / (1 + dist*3);
-    test[2] = (fr -> frame[2][x][y]) / (1 + dist*3);
-
+    //change nothing
+    pixel[0] = fr -> frame[0][x][y];
+    pixel[1] = fr -> frame[1][x][y];
+    pixel[2] = fr -> frame[2][x][y];
 
   }else if(type == 1){
 
     //render depth buffer
-    test[0] = 1 / (1 + dist);
-    test[1] = 1 / (1 + dist);
-    test[2] = 1 / (1 + dist);
+    pixel[0] = 1 / (1 + dist*2000);
+    pixel[1] = 1 / (1 + dist*2000);
+    pixel[2] = 1 / (1 + dist*2000);
 
   }
 
 
-  return test;
+  return pixel;
 
 }
 
@@ -90,14 +88,13 @@ int main(){
 
     i++;
 
-
     //rotate light source
-    frame.light_sources[0] -> position = Vector(2000*sin(i * deg2rad), 2000*cos(i * deg2rad), 600);
+    if(file == "scenes/scene1.scene") frame.light_sources[0] -> position = Vector(2000*sin(i * deg2rad), 2000*cos(i * deg2rad), 600);
 
     if(enable_controls) SDL_WarpMouseInWindow(frame.window, frame.width/2, frame.height/2);
 
     frame.Render();
-    frame.ToScreen();
+    frame.ToScreen(PostProcessing);
 
     int x;
     int y;
@@ -115,8 +112,8 @@ int main(){
       if(x < 500) frame.yaw += x - frame.width/2;
       if(y < 500) frame.pitch -= y - frame.height/2;
     }else{
-      frame.camera_position.z = 300;
       frame.pitch = -10;
+      frame.camera_position.z = 300;
     }
 
     //max pitch
@@ -147,7 +144,6 @@ int main(){
     if(keys[SDL_SCANCODE_ESCAPE]){
       exit(EXIT_SUCCESS);
     }
-
 
   }
 
