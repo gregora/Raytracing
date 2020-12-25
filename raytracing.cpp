@@ -283,13 +283,15 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
 
   //iterate through all triangles
   for(int m = 0; m < frame -> triangles.size(); m++){
-    //actually cast the ray
-    float triangle_distance = frame -> triangles[m] -> RayHitsTriangle(ray, ray_position);
+    if(m != avoid_triangle){
+      //actually cast the ray
+      float triangle_distance = frame -> triangles[m] -> RayHitsTriangle(ray, ray_position);
 
-    if(triangle_distance != -1 && m != avoid_triangle){
-      if(triangle_distance < min_triangle_distance){
-        triangle_num = m;
-        min_triangle_distance = triangle_distance;
+      if(triangle_distance != -1){
+        if(triangle_distance < min_triangle_distance){
+          triangle_num = m;
+          min_triangle_distance = triangle_distance;
+        }
       }
     }
   }
@@ -359,11 +361,17 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
       }
     }
 
-    //calculate pixel color from all
-    float brightness_coef = received_light_power / combined_light_power;
-    return_colors[0] = r * brightness_coef;
-    return_colors[1] = g * brightness_coef;
-    return_colors[2] = b * brightness_coef;
+    //calculate pixel color from its brightness
+    if(combined_light_power != 0){
+      float brightness_coef = received_light_power / combined_light_power;
+      return_colors[0] = r * brightness_coef;
+      return_colors[1] = g * brightness_coef;
+      return_colors[2] = b * brightness_coef;
+    }else{
+      return_colors[0] = 0;
+      return_colors[1] = 0;
+      return_colors[2] = 0;
+    }
 
     return_colors[3] = min_triangle_distance;
 
@@ -463,6 +471,7 @@ void Frame::CreateWindow(char * title){
 }
 
 
+//load a scene from a file (usually .scene)
 void Frame::Load(std::string file, float movex, float movey, float movez){
 
   int lines = 0;
