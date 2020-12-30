@@ -34,6 +34,8 @@ class Vector {
 
     float Length();
 
+    float LengthSquared();
+
     float ScalarProjectionOf(Vector v);
 
     void Normalize();
@@ -80,6 +82,9 @@ class LightSource {
 float DotProduct(Vector v1, Vector v2);
 
 float AngleBetweenVectors(Vector v1, Vector v2);
+
+//a faster algorithm to approximate 1/sqrt(number)
+float Q_rsqrt(float number);
 
 
 class Frame {

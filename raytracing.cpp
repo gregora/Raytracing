@@ -32,15 +32,20 @@ float Vector::Length(){
   return sqrt(x*x + y*y + z*z);
 }
 
+float Vector::LengthSquared(){
+  return x*x + y*y + z*z;
+}
+
 float Vector::ScalarProjectionOf(Vector v){
-  return DotProduct(Vector(x, y, z), v) / (Length() * Length());
+  return DotProduct(Vector(x, y, z), v) / LengthSquared();
 }
 
 void Vector::Normalize(){
-  float length = Length();
-  x = x / length;
-  y = y / length;
-  z = z / length;
+  float length_squared = LengthSquared();
+
+  x = x * Q_rsqrt(length_squared);
+  y = y * Q_rsqrt(length_squared);
+  z = z * Q_rsqrt(length_squared);
 }
 
 Triangle::Triangle(float* points){
@@ -91,7 +96,7 @@ float Triangle::RayHitsTriangle(Vector ray, Vector ray_position){
 
   float m,n;
 
-  //calculate n and m scales but avoid dividing by 0
+  //solve system of linear equations for m and n
   if(a.x != 0){
 
     if(a.x*b.y - a.y*b.x != 0){
@@ -152,6 +157,21 @@ float AngleBetweenVectors(Vector v1, Vector v2){
 }
 
 
+//a faster algorithm to approximate 1/sqrt(number)
+float Q_rsqrt(float number){
+
+	const float x2 = number * 0.5F;
+	const float threehalfs = 1.5F;
+
+	union {
+		float f;
+		uint32_t i;
+	} conv  = { .f = number };
+	conv.i  = 0x5f3759df - ( conv.i >> 1 );
+	conv.f  *= threehalfs - ( x2 * conv.f * conv.f );
+	return conv.f;
+}
+
 Frame::Frame(const int setwidth, const int setheight){
 
   width = setwidth;
@@ -198,7 +218,7 @@ void Frame::Render(){
 
   //tangents are calculated, so that we know in what directions to shoot the rays
   if(camera_direction.y == 0) camera_direction.y = 0.01f;
-  float t1 = - sqrt(1 / (1 + camera_direction.x*camera_direction.x / (camera_direction.y * camera_direction.y)));
+  float t1 = - Q_rsqrt(1 + camera_direction.x*camera_direction.x / (camera_direction.y * camera_direction.y));
   if(yaw > 180) t1 = -t1;
   float t2 = - t1 * camera_direction.x / camera_direction.y;
   float t3  = tan(roll/180*3.14) * sqrt(t1*t1 + t2*t2);
