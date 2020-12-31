@@ -11,6 +11,7 @@ float * PostProcessing(Frame * fr, int x, int y){
 
   float * pixel = new float[3];
   float dist = fr -> depth_buffer[x][y];
+  float brightness = fr -> brightness_buffer[x][y];
 
   if(type == 0){
     //change nothing
@@ -26,7 +27,14 @@ float * PostProcessing(Frame * fr, int x, int y){
     pixel[2] = 1 / (1 + dist*2000);
 
   }
+  else if(type == 2){
 
+    //render brightness buffer
+    pixel[0] = brightness / fr -> max_brightness;
+    pixel[1] = brightness / fr -> max_brightness;
+    pixel[2] = brightness / fr -> max_brightness;
+
+  }
 
   return pixel;
 

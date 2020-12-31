@@ -193,6 +193,12 @@ Frame::Frame(const int setwidth, const int setheight){
     depth_buffer[i] = new float[height];
   }
 
+  //create 2D array
+  brightness_buffer = new float* [width];
+  for(int i = 0; i < width; i++){
+    brightness_buffer[i] = new float[height];
+  }
+
 }
 
 void Frame::SetSkyColor(float red, float green, float blue){
@@ -245,6 +251,8 @@ void Frame::Render(){
   int screen_width_per_cpu = width / cpu_num;
   std::thread * threads[cpu_num];
 
+  max_brightness = -1;
+
   //dispatch threads to render parts of screen
   for(int cpu = 0; cpu < cpu_num; cpu++){
 
@@ -284,6 +292,13 @@ void Frame::RenderPart(Frame * frame, int from_width, int to_width, Vector spher
 
       frame -> depth_buffer[i][j] = colors[3];
 
+      frame -> brightness_buffer[i][j] = colors[4];
+
+      //set max brightness of a frame
+      if(frame -> max_brightness == -1 || frame -> max_brightness < colors[4]){
+        frame -> max_brightness = colors[4];
+      }
+
       delete(colors);
 
     }
@@ -294,7 +309,7 @@ void Frame::RenderPart(Frame * frame, int from_width, int to_width, Vector spher
 
 float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int reflections, int avoid_triangle){
 
-  float * return_colors = new float[4]; //return r,g,b and depth
+  float * return_colors = new float[5]; //return r,g,b and depth
 
   bool hits = false;
 
@@ -331,7 +346,7 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
 
 
     //calculate if the pixel is in shadow
-    float combined_light_power = frame -> ambient_light; //how much light even is there in the scene?
+    float combined_light_power = frame -> ambient_light + frame -> sky_brightness; //how much light even is there in the scene?
     float received_light_power = frame -> ambient_light;  //how much light did the pixel get?
 
     for(int light = 0; light < frame -> light_sources.size(); light ++){
@@ -383,14 +398,18 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
 
     //calculate pixel color from its brightness
     if(combined_light_power != 0){
-      float brightness_coef = received_light_power / combined_light_power;
-      return_colors[0] = r * brightness_coef;
-      return_colors[1] = g * brightness_coef;
-      return_colors[2] = b * brightness_coef;
+
+      return_colors[0] = r;
+      return_colors[1] = g;
+      return_colors[2] = b;
+
+      return_colors[4] = received_light_power;
     }else{
       return_colors[0] = 0;
       return_colors[1] = 0;
       return_colors[2] = 0;
+
+      return_colors[4] = 0;
     }
 
     return_colors[3] = min_triangle_distance;
@@ -412,6 +431,8 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
       return_colors[1] = (1 - triangle_reflectiveness)*return_colors[1] + triangle_reflectiveness*reflection_colors[1];
       return_colors[2] = (1 - triangle_reflectiveness)*return_colors[2] + triangle_reflectiveness*reflection_colors[2];
 
+      return_colors[4] = (1 - triangle_reflectiveness)*return_colors[4] + triangle_reflectiveness*reflection_colors[4];
+
       delete(reflection_colors);
     }
 
@@ -421,6 +442,8 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
     return_colors[2] = frame -> sky_blue;
 
     return_colors[3] = std::numeric_limits<float>::max();
+
+    return_colors[4] = frame -> sky_brightness;
   }
 
   return return_colors;
@@ -448,8 +471,10 @@ void Frame::ToScreen(float * (*function)(Frame *, int x, int y)){
 
       }
 
+      float pixel_brightness = brightness_buffer[i][j];
+
       //render pixel to screen
-      SDL_SetRenderDrawColor(renderer, frame[0][i][j]*255, frame[1][i][j]*255, frame[2][i][j]*255, 255);
+      SDL_SetRenderDrawColor(renderer, frame[0][i][j]*255*pixel_brightness/(1 + max_brightness), frame[1][i][j]*255*pixel_brightness/(1 + max_brightness), frame[2][i][j]*255*pixel_brightness/(1 + max_brightness), 255);
       SDL_RenderDrawPoint(renderer, i, j);
 
     }

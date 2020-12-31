@@ -98,6 +98,8 @@ class Frame {
 
     float *** frame = nullptr;
     float ** depth_buffer = nullptr;
+    float ** brightness_buffer = nullptr;
+    float max_brightness;
 
     Vector camera_position;
     float ray_length = 1000;
@@ -109,6 +111,7 @@ class Frame {
     std::vector<LightSource *> light_sources;
 
     float ambient_light = 0;
+    float sky_brightness = 1;
     float light_dumping_coefficient = 0.2;
 
     float sky_red = 0;
