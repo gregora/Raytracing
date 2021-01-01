@@ -28,7 +28,7 @@ Before you start compiling, make sure you have SDL2 library installed.
 * main.cpp - The file with main function, that then includes classes and functions from raytracing.cpp file
 * README.md - readme file
 * libraries/ [folder] - a folder in which are all the necessary libraries (except for SDL2). Within this folder there are other folders, with the name of the library used. In each of those folders are then all the necessary .h and .cpp files.
-* lodepng/ [folder] - a folder with all the files necessary to save frames to png images. It was not written by me but you can find it on Github [https://github.com/lvandeve/lodepng](https://github.com/lvandeve/lodepng)
+  * lodepng/ [folder] - a folder with all the files necessary to save frames to png images. It was not written by me but you can find it on Github [https://github.com/lvandeve/lodepng](https://github.com/lvandeve/lodepng)
   * raytracing/ [folder] - the folder, in which all the raytracing stuff is. Everything in this folder is my work
     * raytracing.cpp - The file with most of the code necessary
     * raytracing.h - raytracing.cpp header file
