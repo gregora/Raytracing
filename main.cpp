@@ -1,6 +1,6 @@
 #include <iostream>
 #include <unistd.h>
-#include "raytracing.h"
+#include "libraries/raytracing/raytracing.h"
 
 using namespace std;
 

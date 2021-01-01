@@ -22,13 +22,15 @@ Before you start compiling, make sure you have SDL2 library installed.
 
 * If you want to compile with g++ compiler on Linux, everything is already in `compile.sh` file.
 
-## List of all the files
+## List of all the files and folders
 * .gitignore - A gitignore file
 * compile.sh - A Linux shell script that compiles the whole project
 * main.cpp - The file with main function, that then includes classes and functions from raytracing.cpp file
-* raytracing.cpp - The file with most of the code necessary
-* raytracing.h - raytracing.cpp header file
 * README.md - readme file
+* libraries/ [folder] - a folder in which are all the necessary libraries (except for SDL2). Within this folder there are other folders, with the name of the library used. In each of those folders are then all the necessary .h and .cpp files.
+  * raytracing/ [folder] - the folder, in which all the raytracing stuff is. Everything in this folder is my work
+    * raytracing.cpp - The file with most of the code necessary
+    * raytracing.h - raytracing.cpp header file
 
 ## How to create your own scene
 
