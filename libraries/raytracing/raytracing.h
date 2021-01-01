@@ -8,6 +8,7 @@
 #include <fstream>
 #include <algorithm>
 #include <thread>
+#include "../lodepng/lodepng.h"
 
 
 const float deg2rad = 0.017452778;
@@ -140,6 +141,8 @@ class Frame {
     void CreateWindow(char * title);
 
     void Load(std::string file, float movex = 0, float movey = 0, float movez = 0);
+
+    void SaveAsPng(std::string file);
 
   private:
     Vector camera_direction;

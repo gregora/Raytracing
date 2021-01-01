@@ -42,8 +42,11 @@ float * PostProcessing(Frame * fr, int x, int y){
 
 int main(){
 
+  //settings
   bool debug  = false;
-  bool enable_controls = true;
+  bool enable_controls = false;
+  bool save_frames = true;
+  bool render_to_screen = false;
 
   int width, height;
   string file;
@@ -80,17 +83,20 @@ int main(){
 
   frame.SetSkyColor(0.2, 0.8, 1);
 
-  frame.CreateWindow("Raytracing");
+  if(render_to_screen){
 
-  int i = 0;
+    frame.CreateWindow("Raytracing");
 
-  if(enable_controls){
-    SDL_WarpMouseInWindow(frame.window, frame.width/2, frame.height/2);
-    SDL_ShowCursor(SDL_DISABLE);
+    if(enable_controls){
+      SDL_WarpMouseInWindow(frame.window, frame.width/2, frame.height/2);
+      SDL_ShowCursor(SDL_DISABLE);
+    }
+    
   }
 
 
   float speedz = 0;
+  int i = 0;
 
   while(true){
 
@@ -151,8 +157,13 @@ int main(){
     }
 
     frame.Render();
-    frame.ToScreen(PostProcessing);
+    if(render_to_screen){
+      frame.ToScreen(PostProcessing);
+    }
 
+    if(save_frames == true){
+      frame.SaveAsPng("local/img" + to_string(i) + ".png");
+    }
   }
 
 }

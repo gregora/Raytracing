@@ -630,3 +630,22 @@ void Frame::Load(std::string file, float movex, float movey, float movez){
   }
 
 }
+
+void Frame::SaveAsPng(std::string file){
+
+  unsigned char* img = new unsigned char[3*width*height];
+  for(int x = 0; x < width; x++){
+    for(int y = 0; y < height; y++){
+
+      float pixel_brightness = brightness_buffer[x][y];
+
+      img[3*x + 3*width*y] = (int) (frame[0][x][y]*255*pixel_brightness/(1 + max_brightness));
+      img[3*x + 3*width*y + 1] = (int) (frame[1][x][y]*255*pixel_brightness/(1 + max_brightness));
+      img[3*x + 3*width*y + 2] = (int) (frame[2][x][y]*255*pixel_brightness/(1 + max_brightness));
+
+    }
+  }
+  lodepng::encode(file, img, width, height, LCT_RGB);
+  delete[] img;
+
+}
