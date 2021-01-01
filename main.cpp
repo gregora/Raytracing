@@ -101,9 +101,6 @@ int main(){
 
     if(enable_controls) SDL_WarpMouseInWindow(frame.window, frame.width/2, frame.height/2);
 
-    frame.Render();
-    frame.ToScreen(PostProcessing);
-
     int x;
     int y;
     speedz -= 1;
@@ -152,6 +149,9 @@ int main(){
     if(keys[SDL_SCANCODE_ESCAPE]){
       exit(EXIT_SUCCESS);
     }
+
+    frame.Render();
+    frame.ToScreen(PostProcessing);
 
   }
 

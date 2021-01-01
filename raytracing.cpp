@@ -351,13 +351,15 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
 
     for(int light = 0; light < frame -> light_sources.size(); light ++){
 
+      Vector triangle_normal = t.Normal();
+
       combined_light_power += (frame->light_sources[light] -> brightness);
 
       Vector ray_to_light_source;
       ray_to_light_source = (*(frame -> light_sources[light])).position - collision_position;
 
-      float projection1 = t.Normal().ScalarProjectionOf(ray);
-      float projection2 = t.Normal().ScalarProjectionOf(ray_to_light_source);
+      float projection1 = triangle_normal.ScalarProjectionOf(ray);
+      float projection2 = triangle_normal.ScalarProjectionOf(ray_to_light_source);
 
 
       if(projection1*projection2 > 0){
@@ -387,10 +389,15 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
           float bounce_ray_distance = ray_to_light_source.Length() + (collision_position - ray_position).Length(); //calculate distance from the observer
           float dumping_coef = frame -> light_dumping_coefficient; //get dumping_coef
 
+          float ang_t_ls = AngleBetweenVectors(ray_to_light_source, triangle_normal); //angle between triangle normal and light source
+
+          ang_t_ls = abs(ang_t_ls);
+          if(3.14 - ang_t_ls < ang_t_ls) ang_t_ls = 3.14 - ang_t_ls;
+
           bounce_ray_distance = bounce_ray_distance * bounce_ray_distance; //inverse square law for light intensity
           bounce_ray_distance =  bounce_ray_distance * dumping_coef/1000000; //apply dumping coefficient
 
-          received_light_power += (frame -> light_sources[light] -> brightness) / (1 + bounce_ray_distance); //calculate actual intensity
+          received_light_power += (frame -> light_sources[light] -> brightness) / (1 + bounce_ray_distance) / (1 + ang_t_ls); //calculate actual intensity
         }
 
       }
