@@ -210,12 +210,12 @@ void Frame::SetSkyColor(float red, float green, float blue){
 
 void Frame::Render(){
 
-  if(yaw > 360) yaw = (int)yaw % 360;
-  if(yaw < 0) yaw = 360 - (-(int)yaw % 360);
-  if(pitch > 360) pitch = (int)pitch % 360;
-  if(pitch < 0) pitch = 360 - (-(int)pitch % 360);
-  if(roll > 360) roll = (int)roll % 360;
-  if(roll < 0) roll = 360 - (-(int)roll % 360);
+  if(yaw > 360) yaw = fmod(yaw, 360);
+  if(yaw < 0) yaw = 360 - fmod(-yaw, 360);
+  if(pitch > 360) pitch = fmod(pitch, 360);
+  if(pitch < 0) pitch = 360 - fmod(-pitch, 360);
+  if(roll > 360) roll = fmod(roll, 360);
+  if(roll < 0) roll = 360 - fmod(-roll, 360);
 
   GetCameraDirection();
 

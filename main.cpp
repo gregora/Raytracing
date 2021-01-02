@@ -44,9 +44,9 @@ int main(){
 
   //settings
   bool debug  = false;
-  bool enable_controls = false;
-  bool save_frames = true;
-  bool render_to_screen = false;
+  bool enable_controls = true;
+  bool save_frames = false;
+  bool render_to_screen = true;
 
   int width, height;
   string file;
@@ -91,7 +91,7 @@ int main(){
       SDL_WarpMouseInWindow(frame.window, frame.width/2, frame.height/2);
       SDL_ShowCursor(SDL_DISABLE);
     }
-    
+
   }
 
 
@@ -103,7 +103,17 @@ int main(){
     i++;
 
     //rotate light source
-    if(file == "scenes/scene1.scene") frame.light_sources[0] -> position = Vector(2000*sin(i * deg2rad), 2000*cos(i * deg2rad), 600);
+    if(file == "scenes/scene1.scene"){
+
+       frame.light_sources[0] -> position = Vector(2000*sin(i * deg2rad), 2000*cos(i * deg2rad), 600);
+
+       if(!enable_controls){
+         frame.camera_position = Vector(-1000*cos(((float) i - 360)/2 * deg2rad), 1000*sin(((float) i - 360)/2 * deg2rad), 300) + Vector(1000, 0,0);
+         frame.yaw = -((float) i - 360)/2;
+       }
+
+     }
+
 
     if(enable_controls) SDL_WarpMouseInWindow(frame.window, frame.width/2, frame.height/2);
 
@@ -163,6 +173,10 @@ int main(){
 
     if(save_frames == true){
       frame.SaveAsPng("local/img" + to_string(i) + ".png");
+      std::cout << "Rendered frame " << i << std::endl;
+      if(i == 1800){
+        return 0;
+      }
     }
   }
 
