@@ -394,7 +394,7 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
 
       //cartesian coordinates of pixel on texture (n = x, m = y)
       float n = tr_a.ScalarProjectionOf(pixel);
-      float m = tr_b.ScalarProjectionOf(pixel);
+      float m = per_to_a.ScalarProjectionOf(pixel);
 
       int tex_width = t.texture -> width;
       int tex_height = t.texture -> height;
