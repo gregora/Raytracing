@@ -48,6 +48,42 @@ void Vector::Normalize(){
   z = z * Q_rsqrt(length_squared);
 }
 
+
+
+Texture::Texture(std::string file){
+
+  unsigned w, h;
+
+  std::vector<unsigned char> vector;
+
+  lodepng::decode(vector, w, h, file);
+
+  width = w;
+  height = h;
+
+  //create 3D array
+  texture = new float** [3];
+  for(int i = 0; i < 3; i++){
+    texture[i] = new float* [width];
+    for(int j = 0; j < width; j++){
+      texture[i][j] = new float[height];
+    }
+  }
+
+
+  //actually create the texture
+  for(int i = 0; i < width; i++){
+    for(int j = 0; j < height; j++){
+      texture[0][i][j] = ((float) vector[4*i + 4*width*j]) / 255;
+      texture[1][i][j] = ((float) vector[4*i + 4*width*j + 1]) / 255;
+      texture[2][i][j] = ((float) vector[4*i + 4*width*j + 2]) / 255;
+    }
+  }
+
+}
+
+
+
 Triangle::Triangle(float* points){
 
   position.x = points[0];
@@ -337,9 +373,40 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
     Triangle t = *(frame -> triangles[triangle_num]);
 
     //get r,g,b values for pixel
-    float r = t.red;
-    float g = t.green;
-    float b = t.blue;
+    float r,g,b;
+    if(t.texture == nullptr){
+      //if triangle has no texture, use its colors
+      r = t.red;
+      g = t.green;
+      b = t.blue;
+    }else{
+      //if triangle does have a texture, use it
+
+      Vector tr_pos = t.position;
+      Vector tr_a = t.a;
+      Vector tr_b = t.b;
+      Vector per_to_a = tr_a + tr_b * (- DotProduct(tr_a, tr_a) / DotProduct(tr_a, tr_b));//vector, perpendicular to a
+
+      float rescale_per_to_a = per_to_a.ScalarProjectionOf(tr_b);
+      per_to_a = per_to_a*rescale_per_to_a; //rescale vector parralel to a, so it is the right size
+
+      Vector pixel = ray*min_triangle_distance + ray_position - tr_pos; //position of pixel in space
+
+      //cartesian coordinates of pixel on texture (n = x, m = y)
+      float n = tr_a.ScalarProjectionOf(pixel);
+      float m = tr_b.ScalarProjectionOf(pixel);
+
+      int tex_width = t.texture -> width;
+      int tex_height = t.texture -> height;
+      float *** tr_texture = t.texture -> texture;
+
+      r = tr_texture[0][(int) (n * tex_width)][tex_height - (int) (m * tex_height)];
+      g = tr_texture[1][(int) (n * tex_width)][tex_height - (int) (m * tex_height)];
+      b = tr_texture[2][(int) (n * tex_width)][tex_height - (int) (m * tex_height)];
+
+
+    }
+
 
     Vector collision_position;
     collision_position = ray*min_triangle_distance + (ray_position);
@@ -596,6 +663,56 @@ void Frame::Load(std::string file, float movex, float movey, float movez){
 
       Triangle* t = new Triangle(triangle);
       t -> SetColor(red, green, blue);
+      t -> reflectiveness = reflectiveness;
+      triangles.push_back(t);
+
+    }else if(line[0] == 't' && line[1] == 't' && line[2] == 'r') {
+      //add textured triangle
+
+      if(line[line.size() - 1] != ' '){
+        line.append(" ");
+      }
+
+      line = line.substr(4, line.size() - 1);
+
+      float triangle[9];
+      std::string path;
+      float reflectiveness = 0;
+      int j = 0;
+
+      while(line.find(" ") != std::string::npos){
+
+        int spacepos = line.find(" ");
+
+        std::string word = line.substr(0, spacepos);
+
+        if(j < 9){
+          float coord = std::stof(word);
+
+          //move for desired transform
+          if(j % 3 == 0){
+            coord = coord + movex;
+          }else if((j - 1) % 3 == 0){
+            coord = coord + movey;
+          }else if((j - 2) % 3 == 0){
+            coord = coord + movez;
+          }
+
+          triangle[j] = coord;
+
+        }else if(j == 9){
+          path = word;
+        }else if(j == 10){
+          reflectiveness = std::stof(word);
+        }
+
+        line = line.substr(spacepos + 1, line.size());
+        j++;
+
+      }
+      Texture* tex = new Texture(path);
+      Triangle* t = new Triangle(triangle);
+      t -> texture = tex;
       t -> reflectiveness = reflectiveness;
       triangles.push_back(t);
 

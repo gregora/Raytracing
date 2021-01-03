@@ -43,6 +43,18 @@ class Vector {
 
 };
 
+
+class Texture {
+
+  public:
+    int height;
+    int width;
+    float *** texture = nullptr;
+
+    Texture(std::string file);
+
+};
+
 class Triangle {
 
 
@@ -54,6 +66,8 @@ class Triangle {
     float red;
     float green;
     float blue;
+
+    Texture* texture = nullptr;
 
     float reflectiveness = 0;
 
