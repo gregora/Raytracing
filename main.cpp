@@ -87,11 +87,6 @@ int main(){
 
     frame.CreateWindow("Raytracing");
 
-    if(enable_controls){
-      SDL_WarpMouseInWindow(frame.window, frame.width/2, frame.height/2);
-      SDL_ShowCursor(SDL_DISABLE);
-    }
-
   }
 
 
@@ -100,20 +95,14 @@ int main(){
 
   while(true){
 
+    if(enable_controls){
+      SDL_WarpMouseInWindow(frame.window, frame.width/2, frame.height/2);
+      SDL_ShowCursor(SDL_DISABLE);
+    }else{
+      SDL_ShowCursor(SDL_ENABLE);
+    }
+
     i++;
-
-    //rotate light source
-    if(file == "scenes/scene1.scene"){
-
-       frame.light_sources[0] -> position = Vector(2000*sin(i * deg2rad), 2000*cos(i * deg2rad), 600);
-
-       if(!enable_controls){
-         frame.camera_position = Vector(-1000*cos(((float) i - 360)/2 * deg2rad), 1000*sin(((float) i - 360)/2 * deg2rad), 300) + Vector(1000, 0,0);
-         frame.yaw = -((float) i - 360)/2;
-       }
-
-     }
-
 
     if(enable_controls) SDL_WarpMouseInWindow(frame.window, frame.width/2, frame.height/2);
 
@@ -132,9 +121,6 @@ int main(){
     if(enable_controls){
       if(x < 500) frame.yaw += x - frame.width/2;
       if(y < 500) frame.pitch -= y - frame.height/2;
-    }else{
-      frame.pitch = -10;
-      frame.camera_position.z = 300;
     }
 
     //max pitch
@@ -160,6 +146,14 @@ int main(){
         speedz = 10;
       }
 
+    }
+
+    if(keys[SDL_SCANCODE_M]){
+      if(enable_controls){
+        enable_controls = false;
+      }else{
+        enable_controls = true;
+      }
     }
 
     if(keys[SDL_SCANCODE_ESCAPE]){
