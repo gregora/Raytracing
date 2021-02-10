@@ -611,54 +611,36 @@ void Frame::Load(std::string file, float movex, float movey, float movez){
   int i = 0;
   while (std::getline (myfile2, line)){
 
-    if(line[0] == '#'){
+    std::vector<std::string> args = SplitString(line, " ");
+
+    if(args[0] == "#"){
       //ignore comments
-    }else if(line[0] == 't' && line[1] == 'r') {
+    }else if(args[0] == "tr") {
       //add triangle
-
-      if(line[line.size() - 1] != ' '){
-        line.append(" ");
-      }
-
-      line = line.substr(3, line.size() - 1);
 
       float triangle[9];
 
       float red, green, blue;
       float reflectiveness = 0;
-      int j = 0;
 
-      while(line.find(" ") != std::string::npos){
+      triangle[0] = std::stof(args[1]) + movex;
+      triangle[1] = std::stof(args[2]) + movey;
+      triangle[2] = std::stof(args[3]) + movez;
 
-        int spacepos = line.find(" ");
+      triangle[3] = std::stof(args[4]) + movex;
+      triangle[4] = std::stof(args[5]) + movey;
+      triangle[5] = std::stof(args[6]) + movez;
 
-        float coord = std::stof(line.substr(0, spacepos));
+      triangle[6] = std::stof(args[7]) + movex;
+      triangle[7] = std::stof(args[8]) + movey;
+      triangle[8] = std::stof(args[9]) + movez;
 
-        if(j < 9){
-          //move for desired transform
-          if(j % 3 == 0){
-            coord = coord + movex;
-          }else if((j - 1) % 3 == 0){
-            coord = coord + movey;
-          }else if((j - 2) % 3 == 0){
-            coord = coord + movez;
-          }
+      red = std::stof(args[10]);
+      green = std::stof(args[11]);
+      blue = std::stof(args[12]);
 
-          triangle[j] = coord;
-
-        }else if(j == 9){
-          red = coord;
-        }else if(j == 10){
-          green = coord;
-        }else if(j == 11){
-          blue = coord;
-        }else if(j == 12){
-          reflectiveness = coord;
-        }
-
-        line = line.substr(spacepos + 1, line.size());
-        j++;
-
+      if(args.size() > 13) {
+        reflectiveness = std::stof(args[13]);
       }
 
       Triangle* t = new Triangle(triangle);
@@ -666,77 +648,51 @@ void Frame::Load(std::string file, float movex, float movey, float movez){
       t -> reflectiveness = reflectiveness;
       triangles.push_back(t);
 
-    }else if(line[0] == 't' && line[1] == 't' && line[2] == 'r') {
+    }else if(args[0] == "ttr") {
       //add textured triangle
 
-      if(line[line.size() - 1] != ' '){
-        line.append(" ");
-      }
-
-      line = line.substr(4, line.size() - 1);
-
       float triangle[9];
-      std::string path;
       float reflectiveness = 0;
-      int j = 0;
 
-      while(line.find(" ") != std::string::npos){
+      triangle[0] = std::stof(args[1]) + movex;
+      triangle[1] = std::stof(args[2]) + movey;
+      triangle[2] = std::stof(args[3]) + movez;
 
-        int spacepos = line.find(" ");
+      triangle[3] = std::stof(args[4]) + movex;
+      triangle[4] = std::stof(args[5]) + movey;
+      triangle[5] = std::stof(args[6]) + movez;
 
-        std::string word = line.substr(0, spacepos);
+      triangle[6] = std::stof(args[7]) + movex;
+      triangle[7] = std::stof(args[8]) + movey;
+      triangle[8] = std::stof(args[9]) + movez;
 
-        if(j < 9){
-          float coord = std::stof(word);
+      std::string path = args[10];
 
-          //move for desired transform
-          if(j % 3 == 0){
-            coord = coord + movex;
-          }else if((j - 1) % 3 == 0){
-            coord = coord + movey;
-          }else if((j - 2) % 3 == 0){
-            coord = coord + movez;
-          }
-
-          triangle[j] = coord;
-
-        }else if(j == 9){
-          path = word;
-        }else if(j == 10){
-          reflectiveness = std::stof(word);
-        }
-
-        line = line.substr(spacepos + 1, line.size());
-        j++;
-
+      if(args.size() > 11) {
+        reflectiveness = std::stof(args[11]);
       }
+
       Texture* tex = new Texture(path);
       Triangle* t = new Triangle(triangle);
       t -> texture = tex;
       t -> reflectiveness = reflectiveness;
       triangles.push_back(t);
 
-    }else if(line[0] == 'l' && line[1] == 'o'){
+    }else if(args[0] == "lo"){
       //recursively load another scene
-      line = line.substr(3, line.size());
-      float x = std::stof(line.substr(0, line.find(" ")));
-      line = line.substr(line.find(" ") + 1, line.size());
-      float y = std::stof(line.substr(0, line.find(" ")));
-      line = line.substr(line.find(" ") + 1, line.size());
-      float z = std::stof(line.substr(0, line.find(" ")));
 
-      Load(line.substr(line.find(" ") + 1, line.size()), x + movex, y + movey, z + movez);
+      float x = std::stof(args[1]);
+      float y = std::stof(args[2]);
+      float z = std::stof(args[3]);
 
-    }else if(line[0] == 'l' && line[1] == 's'){
+      Load(args[4], x + movex, y + movey, z + movez);
+
+    }else if(args[0] == "ls"){
       //light source
-      line = line.substr(3, line.size());
-      float x = std::stof(line.substr(0, line.find(" ")));
-      line = line.substr(line.find(" ") + 1, line.size());
-      float y = std::stof(line.substr(0, line.find(" ")));
-      line = line.substr(line.find(" ") + 1, line.size());
-      float z = std::stof(line.substr(0, line.find(" ")));
-      line = line.substr(line.find(" ") + 1, line.size());
-      float brightness = std::stof(line.substr(0, line.find(" ")));
+      float x = std::stof(args[1]);
+      float y = std::stof(args[2]);
+      float z = std::stof(args[3]);
+      float brightness = std::stof(args[4]);
 
       LightSource* l = new LightSource(x, y, z, brightness);
       light_sources.push_back(l);
@@ -764,5 +720,21 @@ void Frame::SaveAsPng(std::string file){
   }
   lodepng::encode(file, img, width, height, LCT_RGB);
   delete[] img;
+
+}
+
+std::vector<std::string> SplitString(std::string string, std::string split_by){
+
+  std::vector<std::string> ret;
+
+  while(string.find(split_by) != std::string::npos){
+    int spacepos = string.find(split_by);
+    ret.push_back(string.substr(0, spacepos));
+    string = string.substr(spacepos + split_by.size(), string.size());
+  }
+
+  ret.push_back(string.substr(0, string.find(split_by)));
+
+  return ret;
 
 }

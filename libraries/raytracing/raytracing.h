@@ -161,5 +161,7 @@ class Frame {
   private:
     Vector camera_direction;
 
-
 };
+
+
+std::vector<std::string> SplitString(std::string string, std::string split_by);
