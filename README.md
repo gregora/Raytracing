@@ -12,6 +12,7 @@ The code is written for Linux, but if you compile it, it should work on windows 
 * ~~Add reflections~~
 * ~~Parallelize rendering~~
 * ~~Add shadows~~
+* ~~Add supersampling~~
 * ~~Fix a bug with random lines being shown~~
 * ~~Fix shadow bugs~~
 

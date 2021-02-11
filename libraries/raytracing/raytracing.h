@@ -138,6 +138,7 @@ class Frame {
     float sky_blue = 0;
 
     int reflections_number = 1;
+    int spp = 1; //samples per pixel
 
     SDL_Window *window;
     SDL_Renderer *renderer;

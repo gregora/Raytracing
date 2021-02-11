@@ -327,25 +327,46 @@ void Frame::RenderPart(Frame * frame, int from_width, int to_width, Vector spher
   for(int i = from_width; i < to_width; i++){
     for(int j = 0; j < frame -> height; j++){
 
-      //calculate current ray
-      Vector current_ray = frame -> camera_direction + sphere_tangent1*(i - frame -> width/2) + sphere_tangent2*(j - frame -> height/2);
+      float r = 0;
+      float g = 0;
+      float b = 0;
 
-      float * colors = GetPixelColor(frame, current_ray, frame -> camera_position, frame -> reflections_number + 1);
+      float depth = 0;
+      float brightness = 0;
 
-      frame -> frame[0][i][j] = colors[0];
-      frame -> frame[1][i][j] = colors[1];
-      frame -> frame[2][i][j] = colors[2];
+      for(int s1 = 0; s1 < frame -> spp; s1++){
+        for(int s2 = 0; s2 < frame -> spp; s2++){
 
-      frame -> depth_buffer[i][j] = colors[3];
+          //calculate current ray
+          Vector current_ray = frame -> camera_direction + sphere_tangent1*(i - frame -> width/2) + sphere_tangent2*(j - frame -> height/2) + /* super-sampling bit*/ sphere_tangent1*(((float)s1)/(frame -> spp)) + sphere_tangent2*(((float)s2)/(frame -> spp));
 
-      frame -> brightness_buffer[i][j] = colors[4];
+          float * colors = GetPixelColor(frame, current_ray, frame -> camera_position, frame -> reflections_number + 1);
 
-      //set max brightness of a frame
-      if(frame -> max_brightness == -1 || frame -> max_brightness < colors[4]){
-        frame -> max_brightness = colors[4];
+          r += colors[0];
+          g += colors[1];
+          b += colors[2];
+
+          depth += colors[3];
+          brightness += colors[4];
+
+          delete(colors);
+        }
       }
 
-      delete(colors);
+      int spp_squared = frame -> spp * frame -> spp;
+      frame -> frame[0][i][j] = r / spp_squared;
+      frame -> frame[1][i][j] = g / spp_squared;
+      frame -> frame[2][i][j] = b / spp_squared;
+
+      frame -> depth_buffer[i][j] = depth / spp_squared;
+
+      frame -> brightness_buffer[i][j] = brightness / spp_squared;
+
+      //set max brightness of a frame
+      if(frame -> max_brightness == -1 || frame -> max_brightness < brightness / spp_squared){
+        frame -> max_brightness = brightness / spp_squared;
+      }
+
 
     }
   }

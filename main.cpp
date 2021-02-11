@@ -81,6 +81,8 @@ int main(){
 
   frame.ray_length = 1000000;
 
+  frame.spp = 2;
+
   frame.SetSkyColor(0.2, 0.8, 1);
 
   if(render_to_screen){
