@@ -120,11 +120,16 @@ void Triangle::SetColor(float r, float g, float b){
 
 }
 
-float Triangle::RayHitsTriangle(Vector ray, Vector ray_position){
+float* Triangle::RayHitsTriangle(Vector ray, Vector ray_position){
 
   float k = GetRayPlaneIntersection(ray, ray_position);
+  float* ret = new float[4];
+  ret[0] = 0;
+  ret[1] = 0;
+  ret[2] = 0;
+  ret[3] = 0;
 
-  if(k > 1 || k < 0) return -1;
+  if(k > 1 || k < 0) return ret;
 
   Vector point_of_intersection;
   point_of_intersection = ray_position + ray*k - position;
@@ -136,40 +141,45 @@ float Triangle::RayHitsTriangle(Vector ray, Vector ray_position){
   if(a.x != 0){
 
     if(a.x*b.y - a.y*b.x != 0){
-      m = (p.y*a.x - p.x*a.y) / (b.y*a.x - b.x*a.y);
+      n = (p.y*a.x - p.x*a.y) / (b.y*a.x - b.x*a.y);
     }else{
-      m = (a.x*p.z - a.z*p.x) / (a.x*b.z - a.z*b.x);
+      n = (a.x*p.z - a.z*p.x) / (a.x*b.z - a.z*b.x);
     }
 
-    if(m < 0 || m > 1) return -1;
-    n = (p.x - m*b.x)/ a.x;
+    if(n < 0 || n > 1) return ret;
+    m = (p.x - n*b.x)/ a.x;
   }else if(a.y != 0){
 
     if(a.y*b.x - a.x*b.y != 0){
-      m = (a.y*p.x - a.x*p.y) / (a.y*b.x - a.x*b.y);
+      n = (a.y*p.x - a.x*p.y) / (a.y*b.x - a.x*b.y);
     }else{
-      m = (a.y*p.z - a.z*p.y) / (a.y*b.z - a.z*b.y);
+      n = (a.y*p.z - a.z*p.y) / (a.y*b.z - a.z*b.y);
     }
 
-    if(m < 0 || m > 1) return -1;
-    n = (p.y - b.y*m)/a.y;
+    if(n < 0 || n > 1) return ret;
+    m = (p.y - b.y*n)/a.y;
   }else{
 
     if(a.z*b.x - a.x*b.z != 0){
-      m = (a.z*p.x - a.x*p.z) / (a.z*b.x - a.x*b.z);
+      n = (a.z*p.x - a.x*p.z) / (a.z*b.x - a.x*b.z);
     }else{
-      m = (a.z*p.y - a.y*p.z) / (a.z*b.y - a.y*b.z);
+      n = (a.z*p.y - a.y*p.z) / (a.z*b.y - a.y*b.z);
     }
 
-    if(m < 0 || m > 1) return -1;
-    n = (p.z - b.z*m)/a.z;
+    if(n < 0 || n > 1) return ret;
+    m = (p.z - b.z*n)/a.z;
 
   }
 
-  if(n < 0 || n > 1) return -1;
-  if(n + m > 1) return -1;
+  if(m < 0 || m > 1) return ret;
+  if(n + m > 1) return ret;
 
-  return k;
+  ret[0] = 1;
+  ret[1] = k;
+  ret[2] = m;
+  ret[3] = n;
+
+  return ret;
 }
 
 
@@ -352,22 +362,28 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
   int triangle_num = -1;
   float min_triangle_distance = std::numeric_limits<float>::max();
 
+  float scale_m, scale_n;
+
   //iterate through all triangles
   for(int m = 0; m < frame -> triangles.size(); m++){
     if(m != avoid_triangle){
       //actually cast the ray
-      float triangle_distance = frame -> triangles[m] -> RayHitsTriangle(ray, ray_position);
+      float* data = (frame -> triangles[m] -> RayHitsTriangle(ray, ray_position));
+      float triangle_distance = data[1];
 
-      if(triangle_distance != -1){
+      if(data[0] != 0){
         if(triangle_distance < min_triangle_distance){
           triangle_num = m;
           min_triangle_distance = triangle_distance;
+          scale_m = data[2];
+          scale_n = data[3];
         }
       }
+      delete data;
     }
   }
 
-  //handle if there was no collision
+  //handle if there was a collision
   if(triangle_num != -1){
 
     Triangle t = *(frame -> triangles[triangle_num]);
@@ -382,28 +398,16 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
     }else{
       //if triangle does have a texture, use it
 
-      Vector tr_pos = t.position;
-      Vector tr_a = t.a;
-      Vector tr_b = t.b;
-      Vector per_to_a = tr_a + tr_b * (- DotProduct(tr_a, tr_a) / DotProduct(tr_a, tr_b));//vector, perpendicular to a
-
-      float rescale_per_to_a = per_to_a.ScalarProjectionOf(tr_b);
-      per_to_a = per_to_a*rescale_per_to_a; //rescale vector parralel to a, so it is the right size
-
-      Vector pixel = ray*min_triangle_distance + ray_position - tr_pos; //position of pixel in space
-
-      //cartesian coordinates of pixel on texture (n = x, m = y)
-      float n = tr_a.ScalarProjectionOf(pixel);
-      float m = per_to_a.ScalarProjectionOf(pixel);
-
       int tex_width = t.texture -> width;
       int tex_height = t.texture -> height;
       float *** tr_texture = t.texture -> texture;
 
-      r = tr_texture[0][(int) (n * tex_width)][tex_height - (int) (m * tex_height)];
-      g = tr_texture[1][(int) (n * tex_width)][tex_height - (int) (m * tex_height)];
-      b = tr_texture[2][(int) (n * tex_width)][tex_height - (int) (m * tex_height)];
+      int x = (int) (t.tex_position.x + scale_m * t.tex_a.x + scale_n * t.tex_b.x);
+      int y = tex_height - (int) (t.tex_position.y + scale_m * t.tex_a.y + scale_n * t.tex_b.y);
 
+      r = tr_texture[0][x][y];
+      g = tr_texture[1][x][y];
+      b = tr_texture[2][x][y];
 
     }
 
@@ -440,13 +444,15 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
           if(m != triangle_num){
 
             //actually cast the ray
-            float triangle_distance = frame -> triangles[m] -> RayHitsTriangle(ray_to_light_source, collision_position);
+            float* data = (frame -> triangles[m] -> RayHitsTriangle(ray_to_light_source, collision_position));
 
             //if pixel is obscured by a triangle, no light from the light source will hit it
-            if(triangle_distance != -1){
+            if(data[0] != 0){
               is_covered = true;
               break;
             }
+
+            delete data;
 
           }
         }
@@ -651,9 +657,11 @@ void Frame::Load(std::string file, float movex, float movey, float movez){
     }else if(args[0] == "ttr") {
       //add textured triangle
 
+
       float triangle[9];
       float reflectiveness = 0;
 
+      //coordinates of triangle in 3d space
       triangle[0] = std::stof(args[1]) + movex;
       triangle[1] = std::stof(args[2]) + movey;
       triangle[2] = std::stof(args[3]) + movez;
@@ -668,14 +676,25 @@ void Frame::Load(std::string file, float movex, float movey, float movez){
 
       std::string path = args[10];
 
-      if(args.size() > 11) {
-        reflectiveness = std::stof(args[11]);
+      //coordinates on texture
+      Vector* tex_1 = new Vector(std::stof(args[11]), std::stof(args[12]));
+      Vector* tex_2 = new Vector(std::stof(args[13]) - std::stof(args[11]), std::stof(args[14]) - std::stof(args[12]));
+      Vector* tex_3 = new Vector(std::stof(args[15]) - std::stof(args[11]), std::stof(args[16]) - std::stof(args[12]));
+
+      //reflectiveness - optional argument
+      if(args.size() > 17) {
+        reflectiveness = std::stof(args[17]);
       }
 
       Texture* tex = new Texture(path);
       Triangle* t = new Triangle(triangle);
       t -> texture = tex;
       t -> reflectiveness = reflectiveness;
+
+      t -> tex_position = *tex_1;
+      t -> tex_a = *tex_2;
+      t -> tex_b = *tex_3;
+
       triangles.push_back(t);
 
     }else if(args[0] == "lo"){

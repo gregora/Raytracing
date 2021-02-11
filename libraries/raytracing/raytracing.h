@@ -67,6 +67,10 @@ class Triangle {
     float green;
     float blue;
 
+    Vector tex_position;
+    Vector tex_a;
+    Vector tex_b;
+
     Texture* texture = nullptr;
 
     float reflectiveness = 0;
@@ -77,7 +81,7 @@ class Triangle {
 
     float GetRayPlaneIntersection(Vector ray, Vector ray_position);
 
-    float RayHitsTriangle(Vector ray, Vector ray_position);
+    float* RayHitsTriangle(Vector ray, Vector ray_position);
 
     void SetColor(float r, float g, float b);
 
