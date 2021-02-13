@@ -81,7 +81,7 @@ int main(){
 
   frame.ray_length = 1000000;
 
-  frame.spp = 2;
+  frame.spp = 1;
 
   frame.SetSkyColor(0.2, 0.8, 1);
 
@@ -132,6 +132,8 @@ int main(){
     const Uint8 *keys = SDL_GetKeyboardState(NULL);
 
     float walking_speed = 10;
+
+    //frame.camera_position.x = frame.camera_position.x + 1;
 
     if(enable_controls){
       if (keys[SDL_SCANCODE_W]){

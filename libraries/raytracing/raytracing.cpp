@@ -147,7 +147,7 @@ float* Triangle::RayHitsTriangle(Vector ray, Vector ray_position){
     }
 
     if(n < 0 || n > 1) return ret;
-    m = (p.x - n*b.x)/ a.x;
+    m = (p.x - n*b.x) / a.x;
   }else if(a.y != 0){
 
     if(a.y*b.x - a.x*b.y != 0){
@@ -349,7 +349,7 @@ void Frame::RenderPart(Frame * frame, int from_width, int to_width, Vector spher
           depth += colors[3];
           brightness += colors[4];
 
-          delete(colors);
+          delete[] colors;
         }
       }
 
@@ -400,7 +400,7 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
           scale_n = data[3];
         }
       }
-      delete data;
+      delete[] data;
     }
   }
 
@@ -470,10 +470,11 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
             //if pixel is obscured by a triangle, no light from the light source will hit it
             if(data[0] != 0){
               is_covered = true;
+              delete[] data;
               break;
             }
 
-            delete data;
+            delete[] data;
 
           }
         }
@@ -534,7 +535,7 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
 
       return_colors[4] = (1 - triangle_reflectiveness)*return_colors[4] + triangle_reflectiveness*reflection_colors[4];
 
-      delete(reflection_colors);
+      delete[] reflection_colors;
     }
 
   }else{
