@@ -735,7 +735,7 @@ void Frame::Load(std::string file, float movex, float movey, float movez){
       float z = std::stof(args[3]);
       float brightness = std::stof(args[4]);
 
-      LightSource* l = new LightSource(x, y, z, brightness);
+      LightSource* l = new LightSource(x + movex, y + movey, z + movez, brightness);
       light_sources.push_back(l);
 
     }
