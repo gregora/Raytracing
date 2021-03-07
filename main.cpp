@@ -45,7 +45,6 @@ int main(){
   //settings
   bool debug  = false;
   bool enable_controls = true;
-  bool save_frames = false;
   bool render_to_screen = true;
 
   int width, height;
@@ -169,13 +168,6 @@ int main(){
       frame.ToScreen(PostProcessing);
     }
 
-    if(save_frames == true){
-      frame.SaveAsPng("local/img" + to_string(i) + ".png");
-      std::cout << "Rendered frame " << i << std::endl;
-      if(i == 1800){
-        return 0;
-      }
-    }
   }
 
 }
