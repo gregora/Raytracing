@@ -34,6 +34,7 @@ Before you start compiling, make sure you have SDL2 library installed.
   * raytracing/ [folder] - the folder, in which all the raytracing stuff is. Everything in this folder is my work
     * raytracing.cpp - The file with most of the code necessary
     * raytracing.h - raytracing.cpp header file
+* tools/ [folder] - a folder with different tools (like .obj to .scene converter)
 
 ## How to create your own scene
 

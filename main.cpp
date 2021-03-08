@@ -43,9 +43,8 @@ float * PostProcessing(Frame * fr, int x, int y){
 int main(){
 
   //settings
-  bool debug  = false;
+  bool debug = false;
   bool enable_controls = true;
-  bool render_to_screen = true;
 
   int width, height;
   string file;
@@ -84,11 +83,7 @@ int main(){
 
   frame.SetSkyColor(0.2, 0.8, 1);
 
-  if(render_to_screen){
-
-    frame.CreateWindow("Raytracing");
-
-  }
+  frame.CreateWindow("Raytracing");
 
 
   float speedz = 0;
@@ -132,7 +127,6 @@ int main(){
 
     float walking_speed = 10;
 
-    //frame.camera_position.x = frame.camera_position.x + 1;
 
     if(enable_controls){
       if (keys[SDL_SCANCODE_W]){
@@ -164,9 +158,8 @@ int main(){
     }
 
     frame.Render();
-    if(render_to_screen){
-      frame.ToScreen(PostProcessing);
-    }
+    frame.ToScreen(PostProcessing);
+    //frame.SaveAsPng("frame.png");
 
   }
 
