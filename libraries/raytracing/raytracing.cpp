@@ -438,7 +438,7 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
 
 
     //calculate if the pixel is in shadow
-    float combined_light_power = frame -> ambient_light + frame -> sky_brightness; //how much light even is there in the scene?
+    float combined_light_power = frame -> ambient_light; //how much light even is there in the scene?
     float received_light_power = frame -> ambient_light;  //how much light did the pixel get?
 
     for(int light = 0; light < frame -> light_sources.size(); light ++){
@@ -539,19 +539,53 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
     }
 
   }else{
-    return_colors[0] = frame -> sky_red;
-    return_colors[1] = frame -> sky_green;
-    return_colors[2] = frame -> sky_blue;
+
+    if(frame -> skydome == nullptr){ //if no skydome is set, use rgb
+      return_colors[0] = frame -> sky_red;
+      return_colors[1] = frame -> sky_green;
+      return_colors[2] = frame -> sky_blue;
+    }else{
+
+      Vector ray_normal = ray;
+      ray_normal.Normalize();
+
+      int u = (int) ((0.5 + atan2(ray_normal.x, ray_normal.y) / 6.28)*(frame -> skydome -> width));
+      int v = (int) ((0.5 - asin(ray_normal.z) / 3.14)*(frame -> skydome -> height));
+
+      if(u == frame -> skydome -> width){
+        u -= 1;
+      }
+
+      if(v == frame -> skydome -> height){
+        v -= 1;
+      }
+
+
+      return_colors[0] = frame -> skydome -> texture[0][u][v];
+      return_colors[1] = frame -> skydome -> texture[1][u][v];
+      return_colors[2] = frame -> skydome -> texture[2][u][v];
+
+
+    }
 
     return_colors[3] = std::numeric_limits<float>::max();
 
-    return_colors[4] = frame -> sky_brightness;
+    return_colors[4] = 1;
   }
 
   return return_colors;
 
 }
 
+void Frame::ApplyPixelBrightness(int x, int y){
+
+  if(depth_buffer[x][y] < std::numeric_limits<float>::max()){
+    frame[0][x][y] = frame[0][x][y]*brightness_buffer[x][y]/(1 + max_brightness);
+    frame[1][x][y] = frame[1][x][y]*brightness_buffer[x][y]/(1 + max_brightness);
+    frame[2][x][y] = frame[2][x][y]*brightness_buffer[x][y]/(1 + max_brightness);
+  }
+
+}
 
 void Frame::ToScreen(float * (*function)(Frame *, int x, int y)){
 
@@ -560,6 +594,8 @@ void Frame::ToScreen(float * (*function)(Frame *, int x, int y)){
 
   for(int i = 0; i < width; i++){
     for(int j = 0; j < height; j++){
+
+      ApplyPixelBrightness(i, j);
 
       if(function != nullptr){
         //call a user given post processing function, and pass it arguments
@@ -576,7 +612,7 @@ void Frame::ToScreen(float * (*function)(Frame *, int x, int y)){
       float pixel_brightness = brightness_buffer[i][j];
 
       //render pixel to screen
-      SDL_SetRenderDrawColor(renderer, frame[0][i][j]*255*pixel_brightness/(1 + max_brightness), frame[1][i][j]*255*pixel_brightness/(1 + max_brightness), frame[2][i][j]*255*pixel_brightness/(1 + max_brightness), 255);
+      SDL_SetRenderDrawColor(renderer, frame[0][i][j]*255, frame[1][i][j]*255, frame[2][i][j]*255, 255);
       SDL_RenderDrawPoint(renderer, i, j);
 
     }
@@ -738,6 +774,10 @@ void Frame::Load(std::string file, float movex, float movey, float movez){
       LightSource* l = new LightSource(x + movex, y + movey, z + movez, brightness);
       light_sources.push_back(l);
 
+    }else if(args[0] == "sky"){
+      Texture* tex = new Texture(args[1]);
+      skydome = tex;
+
     }
 
     i++;
@@ -751,11 +791,13 @@ void Frame::SaveAsPng(std::string file){
   for(int x = 0; x < width; x++){
     for(int y = 0; y < height; y++){
 
+      ApplyPixelBrightness(x, y);
+
       float pixel_brightness = brightness_buffer[x][y];
 
-      img[3*x + 3*width*y] = (int) (frame[0][x][y]*255*pixel_brightness/(1 + max_brightness));
-      img[3*x + 3*width*y + 1] = (int) (frame[1][x][y]*255*pixel_brightness/(1 + max_brightness));
-      img[3*x + 3*width*y + 2] = (int) (frame[2][x][y]*255*pixel_brightness/(1 + max_brightness));
+      img[3*x + 3*width*y] = (int) (frame[0][x][y]*255);
+      img[3*x + 3*width*y + 1] = (int) (frame[1][x][y]*255);
+      img[3*x + 3*width*y + 2] = (int) (frame[2][x][y]*255);
 
     }
   }

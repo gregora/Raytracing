@@ -130,8 +130,9 @@ class Frame {
     std::vector<LightSource *> light_sources;
 
     float ambient_light = 0;
-    float sky_brightness = 1;
     float light_dumping_coefficient = 0.2;
+
+    Texture *skydome = nullptr;
 
     float sky_red = 0;
     float sky_green = 0;
@@ -152,6 +153,8 @@ class Frame {
     static void RenderPart(Frame * frame, int from_width, int to_width, Vector sphere_tangent1, Vector sphere_tangent2);
 
     static float * GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int reflections, int avoid_triangle = -1); //there has to be an avoid_triangle argument, for reflection to not treat triangle itself as an obsticle
+
+    void ApplyPixelBrightness(int x, int y);
 
     void ToScreen(float * (*function)(Frame *, int x, int y) = nullptr);
 
