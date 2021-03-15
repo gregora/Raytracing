@@ -549,17 +549,11 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
       Vector ray_normal = ray;
       ray_normal.Normalize();
 
-      int u = (int) ((0.5 + atan2(ray_normal.x, ray_normal.y) / 6.28)*(frame -> skydome -> width));
-      int v = (int) ((0.5 - asin(ray_normal.z) / 3.14)*(frame -> skydome -> height));
+      unsigned int u = (int) ((0.5 + atan2(ray_normal.x, ray_normal.y) / 6.28)*(frame -> skydome -> width));
+      unsigned int v = (int) ((0.5 - asin(ray_normal.z) / 3.14)*(frame -> skydome -> height));
 
-      if(u == frame -> skydome -> width){
-        u -= 1;
-      }
-
-      if(v == frame -> skydome -> height){
-        v -= 1;
-      }
-
+      u = u % frame -> skydome -> width;
+      v = v % frame -> skydome -> height;
 
       return_colors[0] = frame -> skydome -> texture[0][u][v];
       return_colors[1] = frame -> skydome -> texture[1][u][v];
@@ -569,7 +563,6 @@ float * Frame::GetPixelColor(Frame * frame, Vector ray, Vector ray_position, int
     }
 
     return_colors[3] = std::numeric_limits<float>::max();
-
     return_colors[4] = 1;
   }
 

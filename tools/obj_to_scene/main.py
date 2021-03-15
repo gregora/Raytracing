@@ -5,29 +5,30 @@ text = text.split("\n")
 
 text_out = ""
 
+vertices = []
+
 for line in text:
     if(line != ""):
         if(line[0] == "f"):
             string = "tr "
 
+
             line_split = line[2:].split(" ")
             line_split = [int(numeric_string) for numeric_string in line_split]
 
-            for v in line_split:
-                vertex = text[v - 1][2:].split(" ")
+            for l in line_split:
+                string+= vertices[l - 1]
 
-                if(len(vertex) == 3):
-                    vertex = [float(numeric_string) for numeric_string in vertex]
-                else:
-                    vertex = [0, 0, 0]
-
-
-                for i in vertex:
-                    i = i*10
-                    string += str(i) + " "
-
-
-            string += "1 1 1 0\n"
+            string += "0.8 1 0.4 0.4\n"
             text_out += string
+        elif (line[0] == "v"):
+            line_split = line[2:].split(" ");
+
+            string = ""
+            string += str(float(line_split[2])*10) + " "
+            string += str(float(line_split[0])*10) + " "
+            string += str(float(line_split[1])*10) + " "
+
+            vertices.append(string);
 
 open(file.replace(".obj", ".scene"), "w").write(text_out)
