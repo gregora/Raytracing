@@ -1,10 +1,7 @@
 # Raytracing
 
 A 3D raytracing engine written in C++.
-Currently in developement.
 Engine supports rasterization, shadows and reflections.
-
-The code is written for Linux, but if you compile it, it should work on windows as well.
 
 ## TODO
 * Add spotlight light sources
@@ -16,6 +13,16 @@ The code is written for Linux, but if you compile it, it should work on windows 
 * ~~Add supersampling~~
 * ~~Fix a bug with random lines being shown~~
 * ~~Fix shadow bugs~~
+
+## Showcase
+
+### Utah teapot with skydome
+![Rendered scene](images/showcase3.png){width=75%}
+### Scene with reflections
+![Rendered scene](images/showcase1.png){width=75%}
+### Depth buffer
+![Depth buffer](images/showcase2.png){width=75%}
+
 
 ## Dependencies
 * SDL2
@@ -48,9 +55,3 @@ A scene file can handle three different instructions
 * `ls` - Add a light source. The following three floats tell its position, and the fourth float tells its brightness. Example: `ls 300 500 20 1`
 * `sky` - Add a skydome. The only argument is the path to the file
 * `#` - Indicates a comment. Any line that does not have a valid command in the beginning will be ignored, but I recommend you still use `#` as comments.
-
-## How does it look?
-
-The first image is a rendered default scene and the second one is visualized depth buffer.
-![Rendered scene](https://i.imgur.com/Mf7az6c.png)
-![Depth buffer](https://i.imgur.com/aM2qoSp.png)
