@@ -17,11 +17,11 @@ Engine supports rasterization, shadows and reflections.
 ## Showcase
 
 ### Utah teapot with skydome
-![Rendered scene](images/showcase3.png){width=75%}
+![Rendered scene](images/showcase3.png)
 ### Scene with reflections
-![Rendered scene](images/showcase1.png){width=75%}
+![Rendered scene](images/showcase1.png)
 ### Depth buffer
-![Depth buffer](images/showcase2.png){width=75%}
+![Depth buffer](images/showcase2.png)
 
 
 ## Dependencies
